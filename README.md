@@ -1,4 +1,4 @@
-# CancerDepPrediction
+# Triplet: Cancer Dependency Prediction from RNA-Seq
 
 **Transcriptional Prediction of Lethality (Triplet)**
 
