@@ -8,8 +8,22 @@ def round_numeric_columns(df, decimals):
     return df
 
 path_to_your_data = "ASPS_data.txt" #replace with path to your isoform-level count data
+path_to_TCGA_count_matrices = "/home/au409/TCGA_count_matrices/" #replace to path with TCGA count matrices downloaded from here: https://osf.io/gqrz9/files/osfstorage
 
-df = pd.read_csv("merged_TCGA_counts.tsv.gz", compression='gzip', header=0, sep='\t', quotechar='"')
+files = sorted([x for x in os.listdir(path_to_TCGA_count_matrices) if "html" in x])
+file0 = files[0]
+files = files[1:]
+out_df = pd.read_csv(path_to_TCGA_count_matrices + file0, compression='gzip', header=0, sep='\t', quotechar='"')
+
+for a in files:
+        df = pd.read_csv(path_to_TCGA_count_matrices + a, compression='gzip', header=0, sep='\t', quotechar='"')
+        out_df = out_df.merge(df,how='outer',on="Unnamed: 0")
+
+out_df.to_csv(path_to_TCGA_count_matrices + "merged_TCGA_counts.tsv.gz", index=False, sep="\t", compression="gzip")
+
+#df = pd.read_csv(path_to_TCGA_count_matrices + "merged_TCGA_counts.tsv.gz", compression='gzip', header=0, sep='\t', quotechar='"')
+df = out_df
+
 df_ids = df['Unnamed: 0'].tolist()
 #ID format: ENST00000000233.9|ENSG00000004059.10|OTTHUMG00000023246.6|OTTHUMT00000059567.2|ARF5-001|ARF5|1103|protein_coding|
 
