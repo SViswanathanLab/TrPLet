@@ -38,7 +38,7 @@ We recommend using STAR/RSEM, we have not tested other methods of quantification
 
 ### Batch Correction
 
-ComBat-seq with lineage as a co-variate. Choose the lineage that most closely matches one of the TCGA lineages (https://gdc.cancer.gov/resources-tcga-users/tcga-code-tables/tcga-study-abbreviations). 
+In general, we noticed that cell line RNA-seq often does not require batch correction with CCLE, while tumor RNA-seq with TCGA almost always does (based on two-component PCA). We recommend batch correcting using ComBat-seq using lineage as a covariate. Choose a lineage of your sample that most closely matches with TCGA or CCLE lineages. TCGA lineages available here: https://gdc.cancer.gov/resources-tcga-users/tcga-code-tables/tcga-study-abbreviations; CCLE lineages are indicated by the string following the underscore "_" in the cell line name (sample_info.csv)
 
 Make sure you use isoform-level counts
 
