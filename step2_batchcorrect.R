@@ -2,7 +2,7 @@
 library(dplyr)
 require(sva)
 
-file_path = "/home/au409/TCGA_count_matrices/ASPS7_TCGA11373_merged_counts.tsv.gz"
+file_path = "ASPS7_TCGA11373_merged_counts.tsv.gz"
 data_frame <- read.table(gzfile(file_path), header = TRUE, sep = "\t")
 count_matrix <- data_frame[, -(1:3)]
 batch <- c(rep(1, 7), rep(2, 11373))
@@ -12,5 +12,5 @@ group <- c(24, 24, 24, 24, 24, 24, 24, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 
 adjusted <- ComBat_seq(count_matrix, batch=batch, group=group)
 final_matrix <- cbind(data_frame[, 1:3], adjusted)
-file_path2 <- "/home/au409/TCGA_count_matrices/batch_corrected_Wang_TCGA_counts_with_lineageCOV.tsv.gz"
+file_path2 <- "batch_corrected_Wang_TCGA_counts_with_lineageCOV.tsv.gz"
 write.table(final_matrix, file = gzfile(file_path2), sep = "\t", quote = FALSE, row.names = FALSE)
