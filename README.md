@@ -6,7 +6,16 @@ If used, please cite: _"A landscape and prediction of dependencies in TFE3 fusio
 
 ## Summary
 
-This repo provides the scripts and workflow to accurately predict cancer dependency scores from tumor or cell-line RNA-seq data for a subset of highly predictable genes (N=648). Although you can predict dependency scores for all genes, the accuracy will be substantially lower since most genetic dependencies are not predictable from RNA-seq data alone. The overall workflow involves taking isoform-level RNA count data, batch correcting it (if needed), merging it with a large RNA-sequencing dataset (cell lines: DepMap / CCLE, tumors: TCGA), normalizing RNA-seq counts, reducing dimensionality (by subsetting the train+test data to the top M features with the highest |Pearson correlation coefficient| to the dependency being predicted using the train data, by default M=5000), training the support vector regression model, and lastly predicting dependencies on your Z-scored normalized merged batch-corrected RNA-seq data. The data the model is trained on is the entirety of DepMap. When assessing model performance, we used 5-fold cross-validation, training on 80% of DepMap and assessing performance using the remaining 20% (then repeating).
+This repo provides the scripts and workflow to accurately predict cancer dependency scores from tumor or cell-line RNA-seq data for a subset of highly predictable genes (N=648). Although you can predict dependency scores for all genes, the accuracy will be substantially lower since most genetic dependencies are not predictable from RNA-seq data alone. The overall workflow involves:
+
+1. taking isoform-level RNA count data
+2. batch correcting it (if needed), merging it with a large RNA-sequencing dataset (cell lines: DepMap / CCLE, tumors: TCGA)
+3. normalizing RNA-seq counts
+4. reducing dimensionality (by subsetting the train+test data to the top M features with the highest |Pearson correlation coefficient| to the dependency being predicted using the train data, by default M=5000)
+5. training the support vector regression model
+6. predicting dependencies on your Z-scored normalized merged batch-corrected RNA-seq data
+
+The data the model is trained on is the entirety of DepMap. When assessing model performance, we used 5-fold cross-validation, training on 80% of DepMap and assessing performance using the remaining 20% (then repeating).
 
 The calculations you will perform on a merged, batch-corrected isoform-level count matrix during normalization are the following:
 
