@@ -25,10 +25,6 @@ The model is trained on the entirety of DepMap/CCLE. When assessing model perfor
 
 The workflow differs slightly depending on input data. There are four major considerations:
 
-### Computing Isoform-Level Counts
-
-We recommend using STAR/RSEM, we have not tested other methods of quantification, though they may also work.
-
 ### Cell Line or Tumor RNA-Seq Data
 
 - If predicting on __CCLE RNA-seq__, you can directly use normalized CCLE RNA-seq data (gene TPM is fine for this purpose and is available here: https://depmap.org/portal/data_page/?tab=currentRelease; Note: convert this to Z-scored log<sub>2</sub>(TPM+1) then continue at step 4 of the main workflow)
@@ -45,5 +41,9 @@ In general, we noticed that cell line RNA-seq often does not require batch corre
 This is completely optional; including mutation calls may increase the accuracy of predicting dependency scores for a few genes. If you choose to inclue mutation data, it should be binarized (0: no mutation, 1: mutation present) then Z-scored. You can add mutation status of a gene manually during the RNA-seq normalization stage. CCLE has mutation calls available here: https://depmap.org/portal/data_page. TCGA has mutation calls available here: https://gdc.cancer.gov/about-data/publications/pancanatlas. One should filter to high impact / deleterious / hotspot mutations.
 
 If you wish to call mutations from RNA-seq data, consider using an established workflow such as GATK's: https://gatk.broadinstitute.org/hc/en-us/articles/360035531192-RNAseq-short-variant-discovery-SNPs-Indels.
+
+### Computing Isoform-Level Counts
+
+We recommend using STAR/RSEM, we have not tested other methods of quantification, though they may also work.
 
 
