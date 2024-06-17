@@ -1,6 +1,6 @@
 # CancerDepPrediction
 
-## Cancer dependency prediction from RNA (CaDeRNA) tool from: "A landscape and prediction of dependencies in TFE3 fusion-driven cancers" (Li* & Sadagopan* et al.)
+Cancer dependency prediction from RNA (CaDeRNA) tool from: "A landscape and prediction of dependencies in TFE3 fusion-driven cancers" (Li* & Sadagopan* et al.)
 
 We provide the workflow and scripts to take 
 
