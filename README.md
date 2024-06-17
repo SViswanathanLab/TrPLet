@@ -4,8 +4,11 @@
 
 If used, please cite: _"A landscape and prediction of dependencies in TFE3 fusion-driven cancers"_ (Li* & Sadagopan* et al.)
 
-We provide the workflow and scripts to take 
+## Summary
 
+a
+
+## Workflow
 
 workflow differs slightly depending on input data. There are a few things to consider prior to implementing the general procedure. Your goal is to get your RNA-seq data batch corrected with either TCGA or CCLE 
 
