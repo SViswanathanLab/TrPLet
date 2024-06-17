@@ -1,0 +1,14 @@
+#!/bin/bash
+source /etc/profile
+#$ -S /bin/bash
+#$ -pe pvm 16
+module load /mnt/storage/spack/share/spack/modules/linux-ubuntu16.04-x86_64/star-2.7.2b-gcc-5.4.0-fqvrpgi
+module load /mnt/storage/spack/share/spack/modules/linux-ubuntu16.04-x86_64/rsem-1.3.1-gcc-5.4.0-ml3p6ok
+
+wget https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_38/GRCh38.primary_assembly.genome.fa.gz
+gunzip GRCh38.primary_assembly.genome.fa.gz
+wget https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_38/gencode.v38.annotation.gtf.gz
+gunzip gencode.v38.annotation.gtf.gz
+
+rsem-prepare-reference --gtf gencode.v38.annotation.gtf --star GRCh38.primary_assembly.genome.fa gencode_v38
+rsem-calculate-expression --paired-end --strandedness none --append-names --star RNAseqfastq_1.fq RNAseqfastq_2.fq gencode_v38 NAME
