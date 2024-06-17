@@ -2,7 +2,7 @@
 
 **Cancer dependency prediction from RNA (CaDeRNA)**
 
-**If used, please cite: "A landscape and prediction of dependencies in TFE3 fusion-driven cancers" (Li* & Sadagopan* et al.)**
+__If used, please cite: "A landscape and prediction of dependencies in TFE3 fusion-driven cancers" (Li* & Sadagopan* et al.)__
 
 We provide the workflow and scripts to take 
 
