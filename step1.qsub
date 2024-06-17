@@ -11,4 +11,6 @@ wget https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_38/gencod
 gunzip gencode.v38.annotation.gtf.gz
 
 rsem-prepare-reference --gtf gencode.v38.annotation.gtf --star GRCh38.primary_assembly.genome.fa gencode_v38
+
+#Replace RNAseqfastq with your RNA-seq fastq file and NAME with the output file prefix
 rsem-calculate-expression --paired-end --strandedness none --append-names --star RNAseqfastq_1.fq RNAseqfastq_2.fq gencode_v38 NAME
