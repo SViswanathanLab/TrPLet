@@ -1,6 +1,6 @@
 # CancerDepPrediction
 
-**Cancer dependency prediction from RNA (CaDeRNA)**
+**Transcriptional Prediction of Lethality (Triplet)**
 
 If used, please cite: _"A landscape and prediction of dependencies in TFE3 fusion-driven cancers"_ (Li* & Sadagopan* et al.)
 
