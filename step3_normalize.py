@@ -3,7 +3,7 @@ import numpy as np
 from sklearn.preprocessing import StandardScaler
 from scipy.stats import zscore
 
-df = pd.read_csv("/home/au409/TCGA_count_matrices/batch_corrected_Wang_TCGA_counts_with_lineageCOV.tsv.gz", compression='gzip', header=0, sep='\t', quotechar='"')
+df = pd.read_csv("batch_corrected_Wang_TCGA_counts_with_lineageCOV.tsv.gz", compression='gzip', header=0, sep='\t', quotechar='"')
 print(df)
 
 sample_columns = df.columns.tolist()[3:]
@@ -65,10 +65,9 @@ new_df.columns = temp_df.columns.tolist()
 print(new_df)
 
 new_df.index = gene_list
-#new_df = new_df.head(76)
 new_df = new_df.T
-new_df = new_df.head(7)
+new_df = new_df.head(7) #taking only the first 7 samples (ASPS from Wang) that we are going to predict on
 
 print(new_df)
 
-new_df.to_csv("/home/au409/TCGA_count_matrices/Wang_genelog2TPMp1_Zscored_batchCorr_with_TCGA_lineageCOV_final_no_NORMALS.tsv.gz", sep="\t", compression="gzip")
+new_df.to_csv("Wang_genelog2TPMp1_Zscored_batchCorr_with_TCGA_lineageCOV_final_no_NORMALS.tsv.gz", sep="\t", compression="gzip")
