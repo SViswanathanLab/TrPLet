@@ -8,21 +8,18 @@ If used, please cite: _"A landscape and prediction of dependencies in TFE3 fusio
 
 This repo provides the scripts and workflow to accurately predict cancer dependency scores from tumor or cell-line RNA-seq data for a subset of highly predictable genes (N=648). Although you can predict dependency scores for all genes, the accuracy will be substantially lower since most genetic dependencies are not predictable from RNA-seq data alone. The overall workflow involves:
 
-1. taking isoform-level RNA count data
-2. batch correcting it (if needed), merging it with a large RNA-sequencing dataset (cell lines: DepMap / CCLE, tumors: TCGA)
-3. normalizing RNA-seq counts
-4. reducing dimensionality (by subsetting the train+test data to the top M features with the highest |Pearson correlation coefficient| to the dependency being predicted using the train data, by default M=5000)
-5. training the support vector regression model
-6. predicting dependencies on your Z-scored normalized merged batch-corrected RNA-seq data
+1. Generate isoform-level RNA count data (e.g. RNA fastq -> bam -> counts using STAR/RSEM)
+2. (Batch correct and) merge your data with a large RNA-seq dataset (cell lines: DepMap/CCLE, tumors: TCGA), read batch correction section if you plan to batch correct
+3. Normalize RNA-seq counts
+- Calculate transcripts per kilobase million (TPM) for each isoform
+- Calculate gene TPM by summing isoform TPM per gene
+- Convert TPM to log<sub>2</sub>(TPM+1) to generate log-normal distributions
+- Z-score each feature (i.e. each gene)
+4. Reduce dimensionality (subset the train+test data to the top M features with the highest |Pearson correlation coefficient| to the dependency being predicted in the train data; by default M=5000)
+5. Train the support vector regression model
+6. Predict dependencies on your sample's normalized RNA-seq data
 
-The data the model is trained on is the entirety of DepMap. When assessing model performance, we used 5-fold cross-validation, training on 80% of DepMap and assessing performance using the remaining 20% (then repeating).
-
-The calculations you will perform on a merged, batch-corrected isoform-level count matrix during normalization are the following:
-
-1) Calculate transcripts per kilobase million (TPM) for each isoform
-2) Calculate gene TPM by summing isoform TPM per gene
-3) Convert TPM to log<sub>2</sub>(TPM+1) to generate log-normal distributions
-4) Z-score each feature (i.e. each gene)
+The model is trained on the entirety of DepMap/CCLE. When assessing model performance, we used 5-fold cross-validation.
 
 ## Workflow Considerations
 
