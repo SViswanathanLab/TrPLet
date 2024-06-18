@@ -196,7 +196,7 @@ for q in vals_to_test:
     coefficients = np.sum(dual_coef * support_vectors, axis=0)
 
     coefficients_df = pd.DataFrame({"Features": top_features, "Coefficients": coefficients})
-    coefficients_df.to_csv("/Users/ananthansadagopan/Downloads/MCL1_coefficients.csv")
+    coefficients_df.to_csv("coefficients.csv")
     """
 
     avg_value = [statistics.mean(y_train)]
