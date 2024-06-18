@@ -21,13 +21,11 @@ from sklearn.preprocessing import StandardScaler
 import random
 import math
 from operator import itemgetter
-from preprocess_tRCC_dep_data_for_SVR import preprocess_tRCC_RNA
-from preprocess_tRCC_dep_data_for_SVR import preprocess_ASPS_RNA
 import statistics
 
 #Step 1: Merge RNA-seq and mutation calls
 
-dam_mut_df = pd.read_csv("/Users/ananthansadagopan/Documents/ViswanathanLab/tRCC_CRISPR_screen/Hotspot_Mutations.csv")
+dam_mut_df = pd.read_csv("Hotspot_Mutations.csv") #Downloadable from DepMap Portal
 dam_mut_df['depmap_id'] = dam_mut_df['Unnamed: 0']
 del dam_mut_df['Unnamed: 0']
 
@@ -40,7 +38,7 @@ for a in cols:
         new_cols.append(a)
 dam_mut_df.columns = new_cols
 
-exp_df = pd.read_csv("/Users/ananthansadagopan/Documents/ViswanathanLab/tRCC_CRISPR_screen/Expression_Internal_23Q2.csv")
+exp_df = pd.read_csv("Expression_Public_23Q2.csv") #Downloadable from DepMap Portal
 del exp_df['cell_line_display_name']
 del exp_df['lineage_2']
 del exp_df['lineage_3']
@@ -67,9 +65,9 @@ del merged_df['lineage_1']
 merged_df['lineage'] = numeric_lineages
 RNA_IDs = merged_df['depmap_id'].tolist()
 
-#Step 2: Read the Chronos scores and match order between IV and DV dataframess
+#Step 2: Read the Chronos scores and match order between IV and DV dataframes
 
-df2 = pd.read_csv("/Users/ananthansadagopan/Documents/ViswanathanLab/tRCC_CRISPR_screen/CRISPR_DepMap_Internal_23Q2_Score_Chronos.csv")
+df2 = pd.read_csv("CRISPR_DepMap_Public_23Q2_Score_Chronos.csv") #Downloadable from DepMap Portal
 IDs = df2['Unnamed: 0'].tolist()
 shared_ids = list(set(RNA_IDs) & set(IDs))
 print("Number of cell lines with complete data: " + str(len(shared_ids)))
@@ -102,9 +100,9 @@ for a in uq_lineages:
     lineage_cols.append(lineage_val)
     df[lineage_val] = col
 
-#Step 4: Z-score the RNA-seq, hotspot mutation calls, and lineage annotations, merge with tRCC RNA
+#Step 4: Z-score the RNA-seq, hotspot mutation calls, and lineage annotations
 
-testing_df = pd.read_csv("/Users/ananthansadagopan/Documents/ViswanathanLab/tRCC_CRISPR_screen/Wang_genelog2TPMp1_Zscored_batchCorr_with_TCGA_lineageCOV_final_no_NORMALS.tsv.gz", compression='gzip', header=0, sep='\t', quotechar='"')
+testing_df = pd.read_csv("Wang_genelog2TPMp1_Zscored_batchCorr_with_TCGA_lineageCOV_final_no_NORMALS.tsv.gz", compression='gzip', header=0, sep='\t', quotechar='"') #Generated in step 4
 testing_df = testing_df.dropna(axis=1, how='all')
 names_to_test = testing_df['Unnamed: 0'].tolist()
 del testing_df['Unnamed: 0']
@@ -135,9 +133,9 @@ model = SVR()
 #model = LinearRegression()
 #model = GradientBoostingRegressor()
 #model = xgb.XGBRegressor()
-#model = DecisionTreeRegressor() #0.32
-#model = KNeighborsRegressor() #0.42
-#model = Lasso(alpha=0.01) #0.45
+#model = DecisionTreeRegressor()
+#model = KNeighborsRegressor()
+#model = Lasso(alpha=0.01)
 #model = RandomForestRegressor(n_estimators=100, random_state=42)
 
 correl_coeffs = []
@@ -208,6 +206,6 @@ for q in vals_to_test:
     abc=abc+1
 
 output_df = pd.DataFrame(output_vals)
-output_df.columns = ['FUUR1','UOK146','UOK109','STFE','CCLE_mean']
+output_df.columns = names_to_test + ['CCLE_mean']
 output_df['Gene'] = vals_to_test
-output_df.to_csv("/Users/ananthansadagopan/Documents/ViswanathanLab/tRCC_CRISPR_screen/tRCC_dep_predictions_SVR_no_batch_correction_M5000_no_mut.csv", index=False)
+output_df.to_csv("tRCC_dep_predictions_SVR_Wang_batchCorrwTCGA_lineageCOV_Zscored_RNAseq_M5000.csv", index=False)
