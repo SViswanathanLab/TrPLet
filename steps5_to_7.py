@@ -121,7 +121,7 @@ df = pd.DataFrame(scaler.fit_transform(df), columns=df.columns)
 
 #Step 5: Predict highly predictable DVs
 
-M5000_df = pd.read_csv("/Users/ananthansadagopan/Documents/ViswanathanLab/tRCC_CRISPR_screen/model_training/predicted_vs_observed_correl_coeffs_Chronos_5foldCV_N5000_SVR_testdata.csv")
+M5000_df = pd.read_csv("SVR_performance/predicted_vs_observed_correl_coeffs_Chronos_5foldCV_N5000_SVR_testdata.csv")
 top_df = M5000_df[M5000_df['Correl_Coeffs_5CV']>=0.4]
 vals_to_test = top_df['Gene_Name'].tolist()
 
