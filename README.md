@@ -1,6 +1,6 @@
-# Triplet: Cancer Dependency Prediction from RNA-Seq
+# TrPLet: Cancer Dependency Prediction from RNA-Seq
 
-**Transcriptional Prediction of Lethality (Triplet)**
+**Transcriptional Prediction of Lethality (TrPLet)**
 
 If used, please cite: _"A landscape and prediction of dependencies in TFE3 fusion-driven cancers"_ (Li* & Sadagopan* et al.)
 
