@@ -2,7 +2,7 @@
 
 **Transcriptional Prediction of Lethality (TrPLet)**
 
-If used, please cite: _"A landscape and prediction of dependencies in TFE3 fusion-driven cancers"_ (Li* & Sadagopan* et al.)
+If used, please cite: _"Assembling a landscape of vulnerabilities across rare kidney cancers"_ (Li* & Sadagopan* et al.)
 
 ## Summary
 
