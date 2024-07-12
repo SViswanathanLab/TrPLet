@@ -55,7 +55,8 @@ for a in cols:
         new_cols.append(a)
 exp_df.columns = new_cols
 
-merged_df = exp_df.merge(dam_mut_df, how='inner', on='depmap_id')
+#Uncomment the line below if you want mutations calls included
+merged_df = exp_df #.merge(dam_mut_df, how='inner', on='depmap_id')
 lineages = merged_df['lineage_1'].tolist()
 uq_lineages = sorted(list(set(lineages)))
 numeric_lineages = []
