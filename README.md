@@ -8,7 +8,7 @@ If used, please cite: _"Assembling a landscape of vulnerabilities across rare ki
 
 This repo provides the scripts and workflow to accurately predict cancer dependency scores from tumor or cell-line RNA-seq data for a subset of highly predictable genes (N=648). Although you can predict dependency scores for all genes, the accuracy will be substantially lower since most genetic dependencies are not predictable from RNA-seq data alone. The most general workflow involves:
 
-1. Generate isoform-level RNA count data (e.g. RNA fastq -> bam -> counts using STAR/RSEM; note: gene-level RNA count data can also be used)
+1. Generate isoform-level* RNA count data (e.g. RNA fastq -> bam -> counts using STAR/RSEM)
 2. Merge your data with a large RNA-seq dataset (cell lines: DepMap/CCLE, tumors: TCGA)
 3. Batch correct your data, read batch correction section if you are considering this
 4. Normalize RNA-seq counts
@@ -19,6 +19,8 @@ This repo provides the scripts and workflow to accurately predict cancer depende
 5. Reduce dimensionality (subset the train+test data to the top M features with the highest |Pearson correlation coefficient| to the dependency being predicted in the train data; by default M=5000)
 6. Train the support vector regression model
 7. Predict dependencies on your sample's normalized RNA-seq data
+
+*gene level count data can also be used
 
 The model is trained on the entirety of DepMap and tested on your dataset. When assessing model performance, we used 5-fold cross-validation across DepMap.
 
