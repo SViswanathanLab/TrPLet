@@ -124,7 +124,7 @@ df = pd.DataFrame(scaler.fit_transform(df), columns=df.columns)
 
 M5000_df = pd.read_csv("SVR_performance/predicted_vs_observed_correl_coeffs_Chronos_5foldCV_N5000_SVR_testdata.csv") #available in this repo
 top_df = M5000_df[M5000_df['Correl_Coeffs_5CV']>=0.4]
-vals_to_test = top_df['Gene_Name'].tolist()
+vals_to_test = top_df['Gene_Name'].tolist() #change vals_to_test to whatever genes you want to test (to force inclusion of certain genes)
 
 N=5000 #Number of features to restrict to
 
