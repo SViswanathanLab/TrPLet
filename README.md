@@ -17,8 +17,7 @@ This repo provides the scripts and workflow to accurately predict cancer depende
 - Convert TPM to log<sub>2</sub>(TPM+1) to generate log-normal distributions
 - Z-score each feature (i.e. each gene)
 5. Reduce dimensionality (subset the train+test data to the top M features with the highest |Pearson correlation coefficient| to the dependency being predicted in the train data; by default M=5000)
-6. Train the support vector regression model
-7. Predict dependencies on your sample's normalized RNA-seq data
+6. Predict dependencies on your sample's normalized RNA-seq data
 
 *gene level count data can also be used
 
