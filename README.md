@@ -39,7 +39,7 @@ In general, we noticed that cell line RNA-seq often does not require batch corre
 
 ### Inclusion of Mutation Calls
 
-This is completely optional; including mutation calls may increase the accuracy of predicting dependency scores for a few genes. If you choose to inclue mutation data, it should be binarized (0: no mutation, 1: mutation present) then Z-scored. You can add mutation status of a gene manually during the RNA-seq normalization stage. CCLE has mutation calls available here: https://depmap.org/portal/data_page. TCGA has mutation calls available here: https://gdc.cancer.gov/about-data/publications/pancanatlas. One should filter to high impact / deleterious / hotspot mutations.
+This is completely optional; including mutation calls may increase the accuracy of predicting dependency scores for a few genes. If you choose to inclue mutation data, it can be binarized (0: no mutation, 1: mutation present) then Z-scored. You can add mutation status of a gene manually during the RNA-seq normalization stage. CCLE has mutation calls available here: https://depmap.org/portal/data_page. TCGA has mutation calls available here: https://gdc.cancer.gov/about-data/publications/pancanatlas. One should filter to high impact / deleterious / hotspot mutations.
 
 If you wish to call mutations from RNA-seq data, consider using an established workflow such as GATK's: https://gatk.broadinstitute.org/hc/en-us/articles/360035531192-RNAseq-short-variant-discovery-SNPs-Indels.
 
