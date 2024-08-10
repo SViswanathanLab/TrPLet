@@ -6,7 +6,7 @@ If used, please cite: _"Assembling a landscape of vulnerabilities across rare ki
 
 ## Summary
 
-This repo provides the scripts and workflow to accurately predict cancer dependency scores from tumor or cell-line RNA-seq data for a subset of highly predictable genes (N=648). Although you can predict dependency scores for all genes, the accuracy will be substantially lower since most genetic dependencies are not predictable from RNA-seq data alone. The most general workflow involves:
+This repo provides the scripts and workflow to accurately predict cancer dependency scores from tumor or cell-line RNA-seq data for a subset of highly predictable genes (N=657). Although you can predict dependency scores for all genes, the accuracy will be substantially lower since most genetic dependencies are not predictable from RNA-seq data alone. The most general workflow involves:
 
 1. Generate/download isoform-level* RNA count data (e.g. RNA fastq -> bam -> counts using STAR/RSEM)
 2. Merge your data with a large RNA-seq dataset (cell lines: DepMap/CCLE, tumors: TCGA)
@@ -15,7 +15,7 @@ This repo provides the scripts and workflow to accurately predict cancer depende
 - Calculate transcripts per kilobase million (TPM) for each isoform
 - Calculate gene TPM by summing isoform TPM per gene
 - Convert TPM to log<sub>2</sub>(TPM+1) to generate log-normal distributions
-- Z-score each feature (i.e. each gene)
+- Z-score each feature (i.e. expression of each gene)
 5. Reduce dimensionality (subset the train+test data to the top M features with the highest |Pearson correlation coefficient| to the dependency being predicted in the train data; by default M=5000)
 6. Predict dependencies on your sample's normalized RNA-seq data
 
@@ -29,10 +29,9 @@ The workflow differs slightly depending on input data. There are four major cons
 
 ### Cell Line or Tumor RNA-Seq Data
 
-- If predicting on __CCLE RNA-seq__, you can directly use normalized CCLE RNA-seq data (gene TPM is fine for this purpose and is available here: https://depmap.org/portal/data_page/?tab=currentRelease; Note: convert this to Z-scored log<sub>2</sub>(TPM+1) then continue at step 4 of the main workflow)
-- If predicting on __non-CCLE RNA-seq__, you should merge your data with CCLE (batch correcting, if needed); if you are not batch correcting, merge your sample's gene TPMs with CCLE gene TPMs, compute Z-scored log<sub>2</sub>(TPM+1), then continue at step 4 of the main workflow. If you are batch correcting, you will merge with CCLE isoform-level count data (available here: https://osf.io/gqrz9/files/osfstorage, and continue at step 2 of the workflow)
-- If predicting on __TCGA tumor RNA-seq__, you can directly use normalized TCGA RNA-seq data (gene FPKM-UQ is fine for this purpose and is available here: https://gdc.cancer.gov/about-data/publications/pancanatlas (file: EBPlusPlusAdjustPANCAN_IlluminaHiSeq_RNASeqV2.geneExp.tsv); Note: convert this to Z-scored log<sub>2</sub>(FPKM-UQ+1) then continue at step 4 of the main workflow)
-- If predicting on __non-TCGA tumor RNA-seq__, you should merge your data with TCGA (batch correction is likely necessary); if batch correcting, you will merge with TCGA isoform-level count data (available here: https://osf.io/gqrz9/files/osfstorage, and continue at step 2 of the workflow)
+- If predicting on __TCGA tumor RNA-seq__, you can directly use normalized counts (gene log<sub>2</sub>(TPM/FPKM-UQ+1) are fine for this purpose; available from here: https://gdc.cancer.gov/about-data/publications/pancanatlas or UCSC Xena). Z-score the expression of each gene and continue at step 5.
+- If predicting on __Non-TCGA tumor RNA-seq__, you should merge your data with TCGA (batch correction is likely necessary); if batch correcting, you will merge the external dataset with TCGA isoform-level count data (available here: https://osf.io/gqrz9/files/osfstorage) and continue at step 2 of the workflow.
+- If predicting on __Cell Line RNA-seq__, you can directly use normalized counts (gene log<sub>2</sub>(TPM+1) available from here: https://depmap.org/portal/data_page/?tab=currentRelease). Z-score the expression of each gene using the mean/standard deviation from DepMap, and continue at step 5. For this use case, batch correction usually isn't necessary. If it is required, merge with CCLE isoform-level counts (available here: https://osf.io/gqrz9/files/osfstorage) and continue at step 2 of the workflow).
 
 ### Batch Correction
 
