@@ -31,7 +31,7 @@ The workflow differs slightly depending on input data. There are four major cons
 
 - If predicting on __TCGA tumor RNA-seq__, you can use gene log<sub>2</sub>(TPM+1), which can be calculated from count data here: https://osf.io/gqrz9/files/osfstorage. Z-score the expression of each gene and continue at step 5.
 - If predicting on __Non-TCGA tumor RNA-seq__, you should merge your data with TCGA (batch correction is likely necessary); if batch correcting, you will merge the external dataset with TCGA isoform-level count data (available here: https://osf.io/gqrz9/files/osfstorage) and continue at step 2 of the workflow.
-- If predicting on __Cell Line RNA-seq__, you can use gene log<sub>2</sub>(TPM+1) available from here: https://depmap.org/portal/data_page/?tab=currentRelease). Z-score the expression of each gene using the mean/standard deviation from DepMap, and continue at step 5. For this use case, batch correction usually isn't necessary. If it is required, merge with CCLE isoform-level counts (available here: https://osf.io/gqrz9/files/osfstorage) and continue at step 2 of the workflow).
+- If predicting on __Cell Line RNA-seq__, you can use gene log<sub>2</sub>(TPM+1) available from here: https://depmap.org/portal/data_page/?tab=currentRelease). Z-score the expression of each gene using the mean/standard deviation from DepMap, and continue at step 5. For this use case, batch correction usually isn't necessary. If it is required, merge with CCLE isoform-level counts (available here: https://osf.io/gqrz9/files/osfstorage) and continue at step 2 of the workflow.
 
 ### Batch Correction
 
