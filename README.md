@@ -35,7 +35,7 @@ The workflow differs slightly depending on input data. There are four major cons
 
 ### Batch Correction
 
-In general, we noticed that cell line RNA-seq often does not require batch correction with CCLE, while tumor RNA-seq with TCGA almost always does (based on two-component PCA). We recommend batch correcting using ComBat-seq using lineage as a covariate. Choose a lineage of your sample that most closely matches with TCGA or CCLE lineages. TCGA lineages available here: https://gdc.cancer.gov/resources-tcga-users/tcga-code-tables/tcga-study-abbreviations; CCLE lineages are indicated by the string following the underscore "_" in the cell line name as indicated in the sample_info.csv file (https://depmap.org/portal/data_page/?tab=allData).
+In general, we noticed that cell line RNA-seq often does not require batch correction with CCLE, while tumor RNA-seq with TCGA almost always does (based on tSNE analysis). We recommend batch correcting using ComBat-seq using lineage as a covariate. Choose a lineage of your sample that most closely matches with TCGA or CCLE lineages. TCGA lineages available here: https://gdc.cancer.gov/resources-tcga-users/tcga-code-tables/tcga-study-abbreviations; CCLE lineages are indicated by the string following the underscore "_" in the cell line name as indicated in the sample_info.csv file (https://depmap.org/portal/data_page/?tab=allData).
 
 ### Inclusion of Mutation Calls
 
