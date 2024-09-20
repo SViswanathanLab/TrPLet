@@ -22,7 +22,7 @@
   * Copy fq1&fq2 files into folder ```data```
   * Prepare ```config/sample_sheet.tsv```
     * Paired-end data is assumed.
-    * 3 types of RNAseq data formats are accommodated: **.fastq.gz, .fq.gz, .fastq**
+    * 3 types of RNAseq data formats are accommodated: **.fastq.gz, .fq.gz, .fastq** (.fq might also work, but I don't have .fq files so I haven't tested if they also work)
     * The ```config/sample_sheet.tsv``` file is an example sample sheet.
     * Modify ```config/sample_sheet.tsv``` to have the first column consisting of sample names, the second column consisting of fq1 file names, and the third column consisting of fq2 file names. Each column is separated by **one space**. 
     * The fq1 & fq2 file names must contain the full sample names.
