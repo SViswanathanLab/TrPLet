@@ -1,0 +1,42 @@
+configfile: "./config/config.yaml"
+
+# tools path
+STAR=config["star"]
+rsem=config["rsem"]
+
+# Read samples.tsv to extract Samples, fq1, fq2
+Samples = []
+fq1 = []
+fq2 = []
+with open(config["samples"]) as file:
+    for line in file:
+        l = line.strip().split(' ')
+        if len(l) == 3:
+            Samples.append(l[0])
+            fq1.append(l[1])
+            fq2.append(l[2])
+
+# Assume the full sample name is within the fq1 and fq2 file name
+# Get the suffix of the seq file name excluding the sample name, used in starAlign.smk and salmonQuant.smk
+fq1_suffix = fq1[0].replace(Samples[0], "")
+fq2_suffix = fq2[0].replace(Samples[0], "")
+
+
+batchCorrect_script=config["batchCorrect"]
+
+
+# run rules
+include: "rules/step1.smk",
+include: "rules/step2.smk",
+include: "rules/step3.smk",
+include: "rules/step4.smk",
+
+rule all:
+    input:
+        multiext("rsem_ref/gencode_v38", ".chrlist", ".n2g.idx.fa", ".transcripts.fa", ".grp", ".seq", ".idx.fa", ".ti", "Log.out"),
+        expand("results/step1/STAR_results/{Sample}/{Sample}_Log.final.out", Sample=Samples),
+        expand("results/step1/rsem_results/{Sample}/{Sample}.isoforms.results", Sample=Samples),
+        "results/step1/isoform_count_matrix.txt",
+        "results/step2/8samples_TCGA11373_merged_counts.tsv.gz",
+        "results/step3/batch_corrected_Wang_TCGA_counts_with_lineageCOV.tsv.gz",
+        "results/step4/Wang_genelog2TPMp1_Zscored_batchCorr_with_TCGA_lineageCOV_final_no_NORMALS.tsv.gz",
