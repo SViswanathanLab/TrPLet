@@ -4,7 +4,7 @@ rule merge_TCGA:
         sample="results/step1/isoform_count_matrix.txt",
 
     output:
-        "results/step2/8samples_TCGA11373_merged_counts.tsv.gz",
+        "results/step2/7samples_TCGA11373_merged_counts.tsv.gz",
     log:
         "logs/merge_TCGA.log"
     threads: 30
@@ -14,4 +14,3 @@ rule merge_TCGA:
         mem_mb=64000
     script:
         "../scripts/step2_merge.py"
-

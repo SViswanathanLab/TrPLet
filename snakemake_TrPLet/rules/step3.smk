@@ -1,6 +1,6 @@
 rule batchCorrect:
     input:
-        "results/step2/8samples_TCGA11373_merged_counts.tsv.gz",
+        "results/step2/7samples_TCGA11373_merged_counts.tsv.gz",
     output:
         "results/step3/batch_corrected_Wang_TCGA_counts_with_lineageCOV.tsv.gz",
     log:
@@ -15,9 +15,8 @@ rule batchCorrect:
         """
         mkdir -p results/step3
 
-        export PATH=$HOME/miniforge3/envs/snakemake_TrPLet/bin:$PATH
+        export PATH=$HOME/miniforge3/envs/TrPLet/bin:$PATH
 
         Rscript {params.batchCorrect} --merged_count {input} --output {output} 2> {log}
 
         """
-
