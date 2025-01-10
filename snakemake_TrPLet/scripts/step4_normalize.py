@@ -1,6 +1,7 @@
 # install packages if needed
 import sys
 import subprocess
+import os
 
 # load required packages
 import pandas as pd
