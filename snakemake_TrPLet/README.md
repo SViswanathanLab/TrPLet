@@ -31,6 +31,7 @@
       * 4th column: RNA-seq file format - choose between **bam** and **fq** (all inputs need to be in the same file format)
       * 5th column: type of inputs - choose between **Non-TCGA** or **Cellline** (all inputs need to be in the same type)
       * 6th column: if the inputs belong to **Non-TCGA**, put the **integer code for lineage**; if the inputs belong to **Cellline**, put **NA**
+    
     **Each column is separated by one comma.** 
     **The fq1 & fq2 file names must contain the full sample names.**
   
