@@ -72,10 +72,10 @@ print(new_df)
 
 new_df.index = gene_list
 new_df = new_df.T
-new_df = new_df.head(7) #taking only the first 7 samples (ASPS from Wang) that we are going to predict on
+#new_df = new_df.head(7) #taking only the first 7 samples (ASPS from Wang) that we are going to predict on
+new_df = new_df.head(snakemake.params['num'])
 
 print(new_df)
 
 os.makedirs("results/step4", exist_ok=True) # Create the directory results/step2
 new_df.to_csv(snakemake.output[0], sep="\t", compression="gzip")
-

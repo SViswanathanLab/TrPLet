@@ -1,12 +1,16 @@
 #!/usr/bin/env bash
-source /etc/profile.d/modules.sh
+
+# activate environment
+activate="${snakemake_params[conda_env]}"
+source $activate TrPLet
+
 exec 2> "${snakemake_log[0]}"  # send all stderr from this script to the log file
 
 reads=(${snakemake_input[reads]})  # don't double-quote this - we want word splitting
 r1="${reads[0]}"
 r2="${reads[1]}"
 
-module load "${snakemake_input[star_path]}"
+# module load "${snakemake_input[star_path]}"
 
 GENOMEDIR="${snakemake_input[index]}"
 GTFFILE="${snakemake_input[gtf]}"
@@ -25,23 +29,20 @@ if [[ "$r1" == *".gz"* ]]; then
   --outFileNamePrefix "${OUTDIR}/${sample_name}_" \
   --readFilesCommand zcat \
   --outSAMattributes All \
-  --outSAMtype BAM SortedByCoordinate \
-  --quantMode TranscriptomeSAM GeneCounts \
+  --outSAMtype BAM Unsorted \
+  --quantMode TranscriptomeSAM \
   --sjdbGTFfile $GTFFILE \
   --outReadsUnmapped Fastx \
-  --outMultimapperOrder Random \
-  --outWigType wiggle
+  --outMultimapperOrder Random
 else
   STAR --runThreadN $THREADS \
   --genomeDir $GENOMEDIR \
   --readFilesIn "${r1}" "${r2}" \
   --outFileNamePrefix "${OUTDIR}/${sample_name}_" \
   --outSAMattributes All \
-  --outSAMtype BAM SortedByCoordinate \
-  --quantMode TranscriptomeSAM GeneCounts \
+  --outSAMtype BAM Unsorted \
+  --quantMode TranscriptomeSAM \
   --sjdbGTFfile $GTFFILE \
   --outReadsUnmapped Fastx \
-  --outMultimapperOrder Random \
-  --outWigType wiggle
+  --outMultimapperOrder Random 
 fi
-

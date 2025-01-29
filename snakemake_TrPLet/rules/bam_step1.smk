@@ -1,31 +1,43 @@
-rule rsem_ref:
+rule bam_to_fastq:
     input:
-        star_path=STAR,
-        rsem_path=rsem,
+        bam_files="data/{Sample}.bam",
+    output:
+        "results/bam_to_fastq/{Sample}/{Sample}_sorted.bam",
+        "results/bam_to_fastq/{Sample}/{Sample}_R1.fastq.gz",
+        "results/bam_to_fastq/{Sample}/{Sample}_R2.fastq.gz",
+    log:
+        "logs/bam_to_fastq/{Sample}.log"
+    threads: 30
+    params:
+        threads=30,
+        conda_env=config['conda_env'],
+    script:
+        "../scripts/bam_to_fastq.sh"
+
+rule rsem_ref:
     output:
         "data/gencode.v38.annotation.gtf",
         "data/GRCh38.primary_assembly.genome.fa",
         directory("rsem_ref"),
-        multiext("rsem_ref/gencode_v38", ".chrlist", ".n2g.idx.fa", ".transcripts.fa", ".grp", ".seq", ".idx.fa", ".ti", "Log.out"),
+        multiext("rsem_ref/gencode_v38", ".chrlist", ".n2g.idx.fa", ".transcripts.fa", ".grp", ".seq", ".idx.fa", ".ti"),
     log:
         "logs/rsem_ref.log"
     threads: 30
     params:
-        threads=30
+        threads=30,
+        conda_env=config['conda_env'],
     shell:
         """
-        source /etc/profile.d/modules.sh
+        source {params.conda_env} TrPLet
+        #source /etc/profile.d/modules.sh
 
         exec 2> {log}
 
-        module load {input.star_path}
-        module load {input.rsem_path}
-
-        wget -c https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_38/gencode.v38.annotation.gtf.gz
+        wget -c http://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_38/gencode.v38.annotation.gtf.gz
         gunzip -c gencode.v38.annotation.gtf.gz > data/gencode.v38.annotation.gtf
 
 
-        wget -c --tries=80 --timeout=60 https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_38/GRCh38.primary_assembly.genome.fa.gz
+        wget -c --tries=80 --timeout=60 http://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_38/GRCh38.primary_assembly.genome.fa.gz
         gunzip -c GRCh38.primary_assembly.genome.fa.gz > data/GRCh38.primary_assembly.genome.fa
 
         mkdir -p rsem_ref
@@ -41,19 +53,18 @@ rule rsem_ref:
 
 rule Align:
     input:
-        star_path=STAR,
         index="rsem_ref",
         gtf="data/gencode.v38.annotation.gtf",
-        reads=["data/{Sample}"+fq1_suffix, "data/{Sample}"+fq2_suffix],
+        reads=["results/bam_to_fastq/{Sample}/{Sample}"+fq1_suffix, "results/bam_to_fastq/{Sample}/{Sample}"+fq2_suffix],
     output:
         "results/step1/STAR_results/{Sample}/{Sample}_Aligned.toTranscriptome.out.bam",
-        "results/step1/STAR_results/{Sample}/{Sample}_ReadsPerGene.out.tab",
         "results/step1/STAR_results/{Sample}/{Sample}_Log.final.out",
     log:
         "logs/star/{Sample}.log"
     threads: 30
     params:
-        threads=30
+        threads=30,
+        conda_env=config['conda_env'],
     script:
         "../scripts/starAlign.sh"
 
@@ -62,26 +73,15 @@ rule Align:
 rule rsem_quant:
     input:
         rsem_ref=multiext("rsem_ref/gencode_v38", ".chrlist", ".n2g.idx.fa", ".transcripts.fa", ".grp", ".seq", ".idx.fa", ".ti"),
-        rsem_path=rsem,
         counts="results/step1/STAR_results/{Sample}/{Sample}_Aligned.toTranscriptome.out.bam",
     output:
         "results/step1/rsem_results/{Sample}/{Sample}.isoforms.results",
+        "results/step1/rsem_results/{Sample}/{Sample}.genes.results",
     log:
         "logs/rsem_quant/{Sample}.log"
     threads: 30
     params:
-        threads=30
+        threads=30,
+        conda_env=config['conda_env'],
     script:
         "../scripts/rsemQuant.sh"
-
-
-
-rule isoform_count:
-    input:
-        isoform_quants=expand("results/step1/rsem_results/{Sample}/{Sample}.isoforms.results", Sample=Samples),
-    output:
-        "results/step1/isoform_count_matrix.txt"
-    log:
-        "logs/isoform_count.log"
-    script:
-        "../scripts/rsem_isoform_countMatrix.py"

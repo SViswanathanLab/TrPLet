@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
-source /etc/profile.d/modules.sh
-module load "${snakemake_input[rsem_path]}"
+
+# activate environment
+activate="${snakemake_params[conda_env]}"
+source $activate TrPLet
 
 exec 2> "${snakemake_log[0]}"  # send all stderr from this script to the log file
 
