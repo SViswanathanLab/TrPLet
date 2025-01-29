@@ -6,7 +6,7 @@
 ├── scripts           # Scripts to run each step 
 ├── README.md
 ├── Snakefile         # Snakemake workflow
-└── TrPLet_env.yml        # env file 
+└── TrPLet_env.yml    # env file 
 
 ```
 
