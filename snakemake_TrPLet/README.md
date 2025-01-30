@@ -30,7 +30,8 @@
       * 3rd column: fq2 file names (if using .bam as input, put the name of .fastq.gz files generated from .bam)
       * 4th column: RNA-seq file format - choose between **bam** and **fq** (all inputs need to be in the same file format)
       * 5th column: type of inputs - choose between **Non-TCGA** or **Cellline** (all inputs need to be in the same type)
-      * 6th column: if the inputs belong to **Non-TCGA**, put the **integer code for lineage**; if the inputs belong to **Cellline**, put **NA**
+      * 6th column: if the inputs belong to **Non-TCGA**, put the **integer code for lineage** based on the table below; if the inputs belong to **Cellline**, put **NA**
+        
         ![Image](https://github.com/user-attachments/assets/affe87db-9482-4333-bc9e-1259a9061b7d)
     
     **Each column is separated by one comma.** 
