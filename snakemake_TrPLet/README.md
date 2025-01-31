@@ -51,7 +51,7 @@
   FUUR-1_rep3,FUUR-1_rep3_1.fq.gz,FUUR-1_rep3_2.fq.gz,fq,Cellline,NA
   ```
       
-### Step4: Run snakemake pipeline in the background without requiring terminal connection all the time (since the analysis takes long)
+### Step5: Run snakemake pipeline in the background without requiring terminal connection all the time (since the analysis takes long)
   ```
   screen -S TrPLet
   conda activate TrPLet # activate TrPLet environment
