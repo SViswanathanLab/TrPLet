@@ -29,7 +29,7 @@ fq2_suffix = fq2[0].replace(Samples[0], "")
 
 num_sample = len(Samples) # get number of samples input
 
-# write input lineages information into a text file saved in data folder (prepared as step4 input)
+# write input lineages information into a text file saved in data folder (prepared as step3 input)
 with open ("data/sample_lineageInfo.txt", "w") as f:
     for e in lineages:
         f.write(f"{e}\n")
