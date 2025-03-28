@@ -13,8 +13,8 @@ def round_numeric_columns(df, decimals):
 df = pd.read_csv(snakemake.input[0], compression='gzip', header=0, sep='\t', quotechar='"')
 
 df['revised_IDs'] = df['gene_name']
-del df['gene_name'] #ID format: ARF5
-#ID format: ENST00000000233.9|ENSG00000004059.10|OTTHUMG00000023246.6|OTTHUMT00000059567.2|ARF5-001|ARF5|1103|protein_coding|
+del df['gene_name'] 
+#ID format: ARF5
 
 df2 = pd.read_csv(snakemake.input[1], sep="\t")
 df2_ids = df2['gene_id'].tolist()
