@@ -20,7 +20,7 @@
 ### Step3: Prepare inputs
   * Create a folder named ```data``` within ```snakemake_TrPLet```
   * Copy RNA-seq files (.bam or .fq or gene-level matrix) into folder ```data```
-  * Download files [here](https://www.dropbox.com/scl/fi/8o3d0yqttmjzjh6i84vzq/Table_S4.xlsx?rlkey=qlthlp1er8uiirs7yjogolwpl&e=1&st=9poxd6ki&dl=0) into folder ```data```
+  * Download files [here](https://www.dropbox.com/scl/fo/wmfhqzzspjfqiezqhajk5/ADAUJUQgCYhnCuI3aOLxHYs?rlkey=v0fmkxyn0cqwm1o9xsqpfdwxk&st=7sc4rj0l&dl=0) into folder ```data```
 
 ### Step4: Prepare ```config/sample_sheet.csv```
   * Paired-end data is assumed.
