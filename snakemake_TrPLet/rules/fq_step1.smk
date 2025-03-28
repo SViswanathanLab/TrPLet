@@ -6,9 +6,9 @@ rule rsem_ref:
         multiext("rsem_ref/gencode_v38", ".chrlist", ".n2g.idx.fa", ".transcripts.fa", ".grp", ".seq", ".idx.fa", ".ti"),
     log:
         "logs/rsem_ref.log"
-    threads: 30
+    threads: 16
     params:
-        threads=30,
+        threads=16,
         conda_env=config['conda_env'],
     shell:
         """
@@ -24,7 +24,7 @@ rule rsem_ref:
         gunzip -c GRCh38.primary_assembly.genome.fa.gz > data/GRCh38.primary_assembly.genome.fa
 
         mkdir -p rsem_ref
-        rsem-prepare-reference -p {threads} \
+        rsem-prepare-reference -p {params.threads} \
         --gtf data/gencode.v38.annotation.gtf \
         --star \
         data/GRCh38.primary_assembly.genome.fa \
@@ -44,9 +44,9 @@ rule Align:
         "results/step1/STAR_results/{Sample}/{Sample}_Log.final.out",
     log:
         "logs/star/{Sample}.log"
-    threads: 30
+    threads: 16
     params:
-        threads=30,
+        threads=16,
         conda_env=config['conda_env'],
     script:
         "../scripts/starAlign.sh"
@@ -58,13 +58,12 @@ rule rsem_quant:
         rsem_ref=multiext("rsem_ref/gencode_v38", ".chrlist", ".n2g.idx.fa", ".transcripts.fa", ".grp", ".seq", ".idx.fa", ".ti"),
         counts="results/step1/STAR_results/{Sample}/{Sample}_Aligned.toTranscriptome.out.bam",
     output:
-        "results/step1/rsem_results/{Sample}/{Sample}.isoforms.results",
         "results/step1/rsem_results/{Sample}/{Sample}.genes.results",
     log:
         "logs/rsem_quant/{Sample}.log"
-    threads: 30
+    threads: 16
     params:
-        threads=30,
+        threads=16,
         conda_env=config['conda_env'],
     script:
         "../scripts/rsemQuant.sh"

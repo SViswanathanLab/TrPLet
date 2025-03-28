@@ -10,8 +10,6 @@ reads=(${snakemake_input[reads]})  # don't double-quote this - we want word spli
 r1="${reads[0]}"
 r2="${reads[1]}"
 
-# module load "${snakemake_input[star_path]}"
-
 GENOMEDIR="${snakemake_input[index]}"
 GTFFILE="${snakemake_input[gtf]}"
 
@@ -44,5 +42,5 @@ else
   --quantMode TranscriptomeSAM \
   --sjdbGTFfile $GTFFILE \
   --outReadsUnmapped Fastx \
-  --outMultimapperOrder Random 
+  --outMultimapperOrder Random
 fi

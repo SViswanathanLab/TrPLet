@@ -34,56 +34,161 @@ with open ("data/sample_lineageInfo.txt", "w") as f:
     for e in lineages:
         f.write(f"{e}\n")
 
-#### Run rules
-# check if the users input bam files or fq files
-if all(i == "bam" for i in file_type):
-    include: "rules/bam_step1.smk",
-    inputs = [
-        expand("results/bam_to_fastq/{Sample}/{Sample}_sorted.bam", Sample=Samples),
-        expand("results/bam_to_fastq/{Sample}/{Sample}_R1.fastq.gz", Sample=Samples),
-        expand("results/bam_to_fastq/{Sample}/{Sample}_R2.fastq.gz", Sample=Samples),
+
+
+###### Run rules
+bam_inputs = [
+    expand("results/bam_to_fastq/{Sample}/{Sample}_sorted.bam", Sample=Samples),
+    expand("results/bam_to_fastq/{Sample}/{Sample}_R1.fastq.gz", Sample=Samples),
+    expand("results/bam_to_fastq/{Sample}/{Sample}_R2.fastq.gz", Sample=Samples),
     ]
+
+fq_inputs = [
+    multiext("rsem_ref/gencode_v38", ".chrlist", ".n2g.idx.fa", ".transcripts.fa", ".grp", ".seq", ".idx.fa", ".ti"),
+    expand("results/step1/STAR_results/{Sample}/{Sample}_Log.final.out", Sample=Samples),
+    expand("results/step1/rsem_results/{Sample}/{Sample}.genes.results", Sample=Samples),
+    ]
+
+common_tumor_inputs = [
+    "results/step2/merged_with_TCGA11373_counts.tsv.gz",
+    "results/step3/batch_corrected_TCGA_counts_with_lineageCOV.tsv.gz",
+    "results/step4/genelog2TPMp1_Zscored_batchCorr_with_TCGA_lineageCOV_final_no_NORMALS.tsv.gz",
+    "results/step5_to_7/dep_predictions_Zscoredlog2TPMp1_bestMODEL_all_genes_geq0.2.csv",
+    ]
+
+common_cellline_inputs = [
+    "results/step2/genelog2TPMp1_Zscored_with_DepMap_Celllines.tsv.gz",
+    "results/step3/dep_predictions_Zscoredlog2TPMp1_bestMODEL_all_genes_geq0.2.csv",
+    ]
+
+
+# check if users input None-TCGA tumors RNA-seq or Cellline RNA-seq
+if all(i == "Tumor" for i in input_type):
+    # check if the users input bam files or fq files or count matrix
+    if all(i == "bam" for i in file_type):
+        include: "rules/bam_step1.smk",
+        include: "rules/tumor_Count.smk",
+        include: "rules/step2.smk",
+        include: "rules/step3.smk",
+        include: "rules/step4.smk",
+        include: "rules/step5_to_7.smk",
+
+        input = [
+            "results/step1/gene_count_matrix.txt",
+            ]
+        All_inputs = bam_inputs + fq_inputs + input + common_tumor_inputs
+
+    elif all(i == "fq" for i in file_type):
+        include: "rules/fq_step1.smk",
+        include: "rules/tumor_Count.smk",
+        include: "rules/step2.smk",
+        include: "rules/step3.smk",
+        include: "rules/step4.smk",
+        include: "rules/step5_to_7.smk",
+
+        input = [
+            "results/step1/gene_count_matrix.txt",
+            ]
+        All_inputs = fq_inputs + input + common_tumor_inputs
+
+    elif all(i == "matrix" for i in file_type):
+        include: "rules/matrix_step2.smk",
+        include: "rules/step3.smk",
+        include: "rules/step4.smk",
+        include: "rules/step5_to_7.smk",
+
+        All_inputs = common_tumor_inputs
+
+    else:
+        print("NOT ALL INPUT FILES ARE IN THE SAME FORMAT")
 else:
-    include: "rules/fq_step1.smk",
-    inputs = []
+    # check if the users input bam files or fq files or count matrix
+    if all(i == "bam" for i in file_type):
+        include: "rules/bam_step1.smk",
+        include: "rules/cellline_TPM.smk",
+        include: "rules/cellline_step2.smk",
+        include: "rules/cellline_step3.smk",
 
-# check if the users input None-TCGA tumors RNA-seq or Cellline RNA-seq
-if all(i == "None-TCGA" for i in input_type):
-    include: "rules/tumor_Count.smk",
-    include: "rules/step2.smk",
-    include: "rules/step3.smk",
-    include: "rules/step4.smk",
-    include: "rules/step5_to_7.smk",
+        input = [
+            "results/step1/gene_TPM_matrix.txt",
+            ]
+        All_inputs = bam_inputs + fq_inputs + input + common_cellline_inputs
 
-    inputs_2 = [
-        multiext("rsem_ref/gencode_v38", ".chrlist", ".n2g.idx.fa", ".transcripts.fa", ".grp", ".seq", ".idx.fa", ".ti"),
-        expand("results/step1/STAR_results/{Sample}/{Sample}_Log.final.out", Sample=Samples),
-        expand("results/step1/rsem_results/{Sample}/{Sample}.isoforms.results", Sample=Samples),
-        expand("results/step1/rsem_results/{Sample}/{Sample}.genes.results", Sample=Samples),
-        "results/step1/isoform_count_matrix.txt",
-        "results/step2/merged_with_TCGA11373_counts.tsv.gz",
-        "results/step3/batch_corrected_TCGA_counts_with_lineageCOV.tsv.gz",
-        "results/step4/genelog2TPMp1_Zscored_batchCorr_with_TCGA_lineageCOV_final_no_NORMALS.tsv.gz",
-        "results/step5_to_7/dep_predictions_Zscoredlog2TPMp1_bestMODEL_all_genes_geq0.2.csv",
-    ]
+    elif all(i == "fq" for i in file_type):
+        include: "rules/fq_step1.smk",
+        include: "rules/cellline_TPM.smk",
+        include: "rules/cellline_step2.smk",
+        include: "rules/cellline_step3.smk",
 
-else:
-    include: "rules/cellline_TPM.smk",
-    include: "rules/cellline_step2.smk",
-    include: "rules/cellline_step3.smk",
+        input = [
+            "results/step1/gene_TPM_matrix.txt",
+            ]
+        All_inputs = fq_inputs + input + common_cellline_inputs
 
-    inputs_2 = [
-        multiext("rsem_ref/gencode_v38", ".chrlist", ".n2g.idx.fa", ".transcripts.fa", ".grp", ".seq", ".idx.fa", ".ti"),
-        expand("results/step1/STAR_results/{Sample}/{Sample}_Log.final.out", Sample=Samples),
-        expand("results/step1/rsem_results/{Sample}/{Sample}.isoforms.results", Sample=Samples),
-        expand("results/step1/rsem_results/{Sample}/{Sample}.genes.results", Sample=Samples),
-        "results/step1/gene_log2_TPM+1_matrix.txt",
-        "results/step2/genelog2TPMp1_Zscored_with_DepMap_Celllines.tsv.gz",
-        "results/step3/dep_predictions_Zscoredlog2TPMp1_bestMODEL_all_genes_geq0.2.csv",
-    ]
+    elif all(i == "matrix" for i in file_type):
+        include: "rules/cellline_matrix_step2.smk",
+        include: "rules/cellline_step3.smk",
 
-all_inputs = inputs + inputs_2
+        All_inputs = common_cellline_inputs
+
+    else:
+        print("NOT ALL INPUT FILES ARE IN THE SAME FORMAT")
+
 
 rule all:
     input:
-        all_inputs
+        All_inputs
+
+
+
+
+# # check if the users input bam files or fq files
+# if all(i == "bam" for i in file_type):
+#     include: "rules/bam_step1.smk",
+#     inputs = [
+#         expand("results/bam_to_fastq/{Sample}/{Sample}_sorted.bam", Sample=Samples),
+#         expand("results/bam_to_fastq/{Sample}/{Sample}_R1.fastq.gz", Sample=Samples),
+#         expand("results/bam_to_fastq/{Sample}/{Sample}_R2.fastq.gz", Sample=Samples),
+#     ]
+# else:
+#     include: "rules/fq_step1.smk",
+#     inputs = []
+#
+# # check if the users input None-TCGA tumors RNA-seq or Cellline RNA-seq
+# if all(i == "None-TCGA" for i in input_type):
+#     include: "rules/tumor_Count.smk",
+#     include: "rules/step2.smk",
+#     include: "rules/step3.smk",
+#     include: "rules/step4.smk",
+#     include: "rules/step5_to_7.smk",
+#
+#     inputs_2 = [
+#         multiext("rsem_ref/gencode_v38", ".chrlist", ".n2g.idx.fa", ".transcripts.fa", ".grp", ".seq", ".idx.fa", ".ti"),
+#         expand("results/step1/STAR_results/{Sample}/{Sample}_Log.final.out", Sample=Samples),
+#         expand("results/step1/rsem_results/{Sample}/{Sample}.genes.results", Sample=Samples),
+#         "results/step1/gene_count_matrix.txt",
+#         "results/step2/merged_with_TCGA11373_counts.tsv.gz",
+#         "results/step3/batch_corrected_TCGA_counts_with_lineageCOV.tsv.gz",
+#         "results/step4/genelog2TPMp1_Zscored_batchCorr_with_TCGA_lineageCOV_final_no_NORMALS.tsv.gz",
+#         "results/step5_to_7/dep_predictions_Zscoredlog2TPMp1_bestMODEL_all_genes_geq0.2.csv",
+#     ]
+#
+# else:
+#     include: "rules/cellline_TPM.smk",
+#     include: "rules/cellline_step2.smk",
+#     include: "rules/cellline_step3.smk",
+#
+#     inputs_2 = [
+#         multiext("rsem_ref/gencode_v38", ".chrlist", ".n2g.idx.fa", ".transcripts.fa", ".grp", ".seq", ".idx.fa", ".ti"),
+#         expand("results/step1/STAR_results/{Sample}/{Sample}_Log.final.out", Sample=Samples),
+#         expand("results/step1/rsem_results/{Sample}/{Sample}.genes.results", Sample=Samples),
+#         "results/step1/gene_log2_TPM+1_matrix.txt",
+#         "results/step2/genelog2TPMp1_Zscored_with_DepMap_Celllines.tsv.gz",
+#         "results/step3/dep_predictions_Zscoredlog2TPMp1_bestMODEL_all_genes_geq0.2.csv",
+#     ]
+#
+# all_inputs = inputs + inputs_2
+#
+# rule all:
+#     input:
+#         all_inputs

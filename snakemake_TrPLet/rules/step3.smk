@@ -8,9 +8,7 @@ rule batchCorrect:
         "logs/batchCorrect.log"
     params:
         batchCorrect=batchCorrect_script,
-        threads=10,
         exportPath=exportPath,
-    threads: 10
     resources:
         mem_mb=256000
     shell:

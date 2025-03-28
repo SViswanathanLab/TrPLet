@@ -1,7 +1,7 @@
 rule merge_TCGA:
     input:
         TCGA="data/merged_TCGA_geneLevel_CountMatrix.tsv.gz",
-        sample="results/step1/gene_count_matrix.txt",
+        sample="data/gene_count_matrix.txt",
 
     output:
         "results/step2/merged_with_TCGA11373_counts.tsv.gz",

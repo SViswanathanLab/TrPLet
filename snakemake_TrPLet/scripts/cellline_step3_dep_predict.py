@@ -22,6 +22,8 @@ from sklearn.linear_model import Ridge
 from sklearn.linear_model import ElasticNet
 from sklearn.preprocessing import StandardScaler
 import os
+import joblib
+
 
 
 
@@ -168,8 +170,8 @@ for q,temp_model_type in zip(vals_to_test,model_types_list):
         model = Ridge(alpha=0.01)
     elif model_portion == "lasso":
         model = Lasso(alpha=0.01)
-    elif model_portion == "knn":
-        model = KNeighborsRegressor()
+    # elif model_portion == "knn":
+    #     model = KNeighborsRegressor()
     elif model_portion == "elasticnet":
         model = ElasticNet(alpha=0.01)
     else:

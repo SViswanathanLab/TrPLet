@@ -14,12 +14,14 @@ print(df)
 
 sample_columns = df.columns.tolist()[3:]
 temp_df = df[sample_columns]
+temp_df = temp_df.apply(pd.to_numeric, errors="coerce")
 temp_df.replace([np.inf, -np.inf], np.nan, inplace=True)
 temp_df = temp_df.fillna(0)
 print(temp_df)
 
-#temp_row = pd.Series(df['effective_length'].tolist())
-temp_row = df['effective_length']
+# temp_row = df['effective_length']
+temp_row = pd.to_numeric(df['effective_length'], errors="coerce")
+
 temp_df = temp_df.div(temp_row, axis=0)
 print(temp_df)
 
@@ -37,20 +39,9 @@ for a in cols:
     new_vals = [x*1000000/sum_val for x in temp_val]
     temp_df[str(a)] = new_vals
 
-#temp_df = temp_df.div(temp_df.sum())*10**6
 print(temp_df)
 
-genes_unp = df['genes'].tolist()
-new_genes = []
-for a in genes_unp:
-    new_genes.append(a.split("-")[0])
-
-temp_df['gene'] = new_genes
-temp_df = temp_df.groupby('gene').mean().reset_index()
-print(temp_df)
-
-gene_list = temp_df['gene'].tolist()
-del temp_df['gene']
+gene_list = df['genes'].tolist()
 
 temp_df = temp_df + 1
 temp_df = np.log2(temp_df)
@@ -72,7 +63,6 @@ print(new_df)
 
 new_df.index = gene_list
 new_df = new_df.T
-#new_df = new_df.head(7) #taking only the first 7 samples (ASPS from Wang) that we are going to predict on
 new_df = new_df.head(snakemake.params['num'])
 
 print(new_df)

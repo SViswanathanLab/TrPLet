@@ -1,9 +1,9 @@
-rule isoform_count:
+rule gene_count:
     input:
-        isoform_quants=expand("results/step1/rsem_results/{Sample}/{Sample}.isoforms.results", Sample=Samples),
+        isoform_quants=expand("results/step1/rsem_results/{Sample}/{Sample}.genes.results", Sample=Samples),
     output:
-        "results/step1/isoform_count_matrix.txt"
+        "results/step1/gene_count_matrix.txt"
     log:
-        "logs/isoform_count.log"
+        "logs/gene_count.log"
     script:
-        "../scripts/rsem_isoform_countMatrix.py"
+        "../scripts/rsem_gene_countMatrix.py"
