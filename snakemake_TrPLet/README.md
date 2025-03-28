@@ -80,8 +80,14 @@
 
   ```
   * Press ```Ctrl+A``` and then ```D``` to detach the screen as needed. Use ```screen -ls``` to see the list of screens. Now closing the terminal or losing connection to the cluster should not interrupt the snakemake job.
-  * Adjust the memory or number of nodes to request as needed.
-    
+  * Adjust the memory or number of nodes to request as needed. May also need to adjust the chunksize in step3_batchcorrect.R when processing large number of samples.
+  * If the pipeline run is interrupted, need to rerun the following for restarting the pipeline from the place it stopped.
+   ```
+   screen -r SCREENID
+   snakemake --unlock
+   snakemake --executor cluster-generic --jobs 20 --latency-wait 60 --cluster-generic-submit-cmd "qsub -l h_vmem=256G, -pe pvm 16 -o $HOME/snakemake_TrPLet/joblogs/ -e $HOME/snakemake_TrPLet/joblogs/"
+
+   ```   
 
 ### Output
 * The results are saved in the folder ```snakemake_TrPLet/results```.
