@@ -4,9 +4,9 @@
 activate="${snakemake_params[conda_env]}"
 source $activate TrPLet
 
-exec 2> "${snakemake_log[0]}"  # send all stderr from this script to the log file
+exec 2> "${snakemake_log[0]}" 
 
-reads=(${snakemake_input[reads]})  # don't double-quote this - we want word splitting
+reads=(${snakemake_input[reads]})  
 r1="${reads[0]}"
 r2="${reads[1]}"
 
