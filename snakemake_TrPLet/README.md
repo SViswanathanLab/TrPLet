@@ -27,13 +27,13 @@
   * The following data file formats are accommodated: **.fastq.gz, .fq.gz, .fastq, .fq, .bam, gene_count_matrix.txt**
       * If the input is gene-level count matrix from RNA-seq, we need to have the file named gene_count_matrix.txt and in the following format:
         ```
-        gene_id	effective_length	Sample1  Sample2	
+        gene_id  effective_length  Sample1  Sample2	
         ENSG00000249352.3_7SK  #  #  #
         ENSG00000249352.3_7SK  #  #  #
         ENSG00000249352.3_7SK  #  #  #
         ENSG00000249352.3_7SK  #  #  #
         ```
-        **The names of the columns and file are strictly forced.**
+        **The names of the columns and file must strictly follow the required format.**
   * The ```config/sample_sheet.csv``` file is an example sample sheet, modify it as needed so that 
       * 1st column: sample names
       * 2nd column: fq1 file names (if using .bam as input, put the name of .fastq.gz files generated from .bam)
