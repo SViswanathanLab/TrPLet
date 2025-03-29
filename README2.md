@@ -4,6 +4,14 @@
 
 If used, please cite: _"Assembling a landscape of vulnerabilities across rare kidney cancers"_ (Li* & Sadagopan* et al.)
 
+## Directory Structure
+.
+├── SVR_performance              
+├── Table_S4_InteractivePlots      # Scripts for Table S4 RShiny app
+├── snakemake_TrPLet               # Snakemake pipeline for TrPLet
+└── README.md
+
+
 ## Summary
 
 This repo provides the scripts and workflow to predict cancer dependency scores from tumor or cell-line RNA-seq data for a subset of highly predictable genes (N=6283). Although you can predict dependency scores for all genes, the accuracy will be substantially lower since most genetic dependencies are not predictable from RNA-seq data alone. The most general workflow involves:
