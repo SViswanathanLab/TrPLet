@@ -8,7 +8,7 @@ If used, please cite: _"Assembling a landscape of vulnerabilities across rare ki
 
 This repo provides the scripts and workflow to predict cancer dependency scores from tumor or cell-line RNA-seq data for a subset of highly predictable genes (N=6283). Although you can predict dependency scores for all genes, the accuracy will be substantially lower since most genetic dependencies are not predictable from RNA-seq data alone. The most general workflow involves:
 
-1. Generate/download gene-level* RNA count matrix or RNAseq bam/fastq files
+1. Generate/download gene-level RNA count matrix or RNA-seq bam/fastq files
 2. Merge your data with a large RNA-seq dataset (cell lines: DepMap/CCLE, tumors: TCGA)
 3. Batch correct your data, read batch correction section if you are considering this
 4. Normalize RNA-seq counts
