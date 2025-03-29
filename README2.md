@@ -5,12 +5,13 @@
 If used, please cite: _"Assembling a landscape of vulnerabilities across rare kidney cancers"_ (Li* & Sadagopan* et al.)
 
 ## Directory Structure
+```
 .
 ├── SVR_performance              
 ├── Table_S4_InteractivePlots      # Scripts for Table S4 RShiny app
 ├── snakemake_TrPLet               # Snakemake pipeline for TrPLet
 └── README.md
-
+```
 
 ## Summary
 
