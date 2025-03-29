@@ -12,8 +12,7 @@ This repo provides the scripts and workflow to predict cancer dependency scores 
 2. Merge your data with a large RNA-seq dataset (cell lines: DepMap/CCLE, tumors: TCGA)
 3. Batch correct your data, read batch correction section if you are considering this
 4. Normalize RNA-seq counts
-- Calculate transcripts per kilobase million (TPM) for each isoform
-- Calculate gene TPM by summing isoform TPM per gene
+- Calculate transcripts per kilobase million (TPM) for each gene
 - Convert TPM to log<sub>2</sub>(TPM+1) to generate log-normal distributions
 - Z-score each feature (i.e. expression of each gene)
 5. Reduce dimensionality (subset the train+test data to the top M features with the highest |Pearson correlation coefficient| to the dependency being predicted in the train data; by default M=5000)
