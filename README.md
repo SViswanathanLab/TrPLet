@@ -8,7 +8,7 @@ If used, please cite the most recent version of the paper that is available on b
 
 ## Summary
 
-This repo provides the scripts and workflow to predict cancer dependency scores from tumor or cell-line RNA-seq data for a subset of highly predictable genes (N=657). Although you can predict dependency scores for all genes, the accuracy will be substantially lower since most genetic dependencies are not predictable from RNA-seq data alone. The most general workflow involves:
+This repo provides the scripts and workflow to predict cancer dependency scores from tumor or cell-line RNA-seq data for a subset of highly predictable genes (N=6283). Although you can predict dependency scores for all genes, the accuracy will be substantially lower since most genetic dependencies are not predictable from RNA-seq data alone. The most general workflow involves:
 
 1. Generate/download isoform-level* RNA count data (e.g. RNA fastq -> bam -> counts using STAR/RSEM)
 2. Merge your data with a large RNA-seq dataset (cell lines: DepMap/CCLE, tumors: TCGA)
