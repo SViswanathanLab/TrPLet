@@ -6,20 +6,39 @@ library(DT)
 
 
 # load data
-plot_data <- readRDS("6283dfs_merged_across_Grouping.rds")
-genes <- readRDS("6283gene_names.rds")
+plot_data <- readRDS("/Volumes/sviswanathan/users/ycui/TrPLet/TrPLet_Table_S4/trplet_rshiny_final/data/6283dfs_merged_across_Grouping.rds")
+genes <- readRDS("/Volumes/sviswanathan/users/ycui/TrPLet/TrPLet_Table_S4/trplet_rshiny_final/data/6283gene_names.rds")
 
-ref_data <- readRDS("6283dfs_DepMap.rds")
+ref_data <- readRDS("/Volumes/sviswanathan/users/ycui/TrPLet/TrPLet_Table_S4/trplet_rshiny_final/data/6283dfs_DepMap.rds")
 
-models_df <- readRDS("6283Models.rds")
-features_df <- readRDS("6283featureWeights.rds")
-module_selection <- readRDS("16845dfs_mergedModuleSelections.rds")
-mutation_df <- readRDS("mutation.rds")
+models_df <- readRDS("/Volumes/sviswanathan/users/ycui/TrPLet/TrPLet_Table_S4/trplet_rshiny_final/data/AllgenesModels.rds")
+features_df <- readRDS("/Volumes/sviswanathan/users/ycui/TrPLet/TrPLet_Table_S4/trplet_rshiny_final/data/6283featureWeights.rds")
+module_selection <- readRDS("/Volumes/sviswanathan/users/ycui/TrPLet/TrPLet_Table_S4/trplet_rshiny_final/data/16845dfs_mergedModuleSelections.rds")
+mutation_df <- readRDS("/Volumes/sviswanathan/users/ycui/TrPLet/TrPLet_Table_S4/trplet_rshiny_final/data/mutation.rds")
 
-dataSources_df <- readRDS("dataSources.rds")
+dataSources_df <- readRDS("/Volumes/sviswanathan/users/ycui/TrPLet/TrPLet_Table_S4/trplet_rshiny_final/data/dataSources.rds")
 
+genes_6283 <- sort(genes) 
+genes_all <- sort(models_df$Gene_Name)
 
-# Define UI for the dashboard
+# -------------------- global colors reused across renders ---------------------
+TCGA_COLORS <- c(
+  "#1f77b4", "#FFA07A", "#2ca02c", "#AC6A9F", "#9467bd", "#008080", "#e377c2",
+  "#7f7f7f", "#bcbd22", "#17becf", "#aec7e8", "#ffbb78", "#98df8a", "#ff9896",
+  "#c5b0d5", "#c49c94", "#f7b6d2", "#c7c7c7", "#dbdb8d", "#9edae5", "#393b79",
+  "#637939", "#8c6d31", "#5f9ea0", "#FFE119", "#5254a3", "#6b6ecf", "#9c9ede",
+  "#cedb9c", "#e7cb94", "#e7ba52", "#bd9e39", "#8c6d78"
+)
+
+BASE_BAR_COLORS <- c(
+  SVR = "#aec7e8",
+  ridge_regression = "#c5b6d2",
+  linear_SVR = "#cedb9c",
+  lasso_regression = "#fffacd",
+  elasticnet_regression = "#f7b6d2"
+)
+
+# ------------------------------ UI -------------------------------
 ui <- fluidPage(
   
   # Centered Title
@@ -102,12 +121,12 @@ ui <- fluidPage(
                sidebarPanel(
                  width = 3,
                  # Dropdown for gene selection
-                 selectInput("selected_gene", "Select a gene:", choices = genes, selected = genes[1], selectize = TRUE),
+                 selectInput("selected_gene", "Select a gene:", choices = genes_6283, selected = genes_6283[1], selectize = TRUE),
                  
                  # Dropdown for tumor type selection (initially populated based on the first gene)
                  selectInput("selected_grouping_l1", "Select RNA-seq type:", 
-                             choices = unique(plot_data[[genes[1]]]$Grouping_L1), 
-                             selected = unique(plot_data[[genes[1]]]$Grouping_L1)[1],
+                             choices = unique(plot_data[[genes_6283[1]]]$Grouping_L1), 
+                             selected = unique(plot_data[[genes_6283[1]]]$Grouping_L1)[1],
                              selectize = TRUE),
                  # Checkbox group for Grouping_L2 options (populated dynamically)
                  uiOutput("grouping_l2_ui")
@@ -139,7 +158,7 @@ ui <- fluidPage(
                sidebarPanel(
                  width = 2,
                  # Dropdown for gene selection
-                 selectInput("selected_gene_feature", "Select a gene:", choices = genes, selected = genes[1], selectize = TRUE)
+                 selectInput("selected_gene_feature", "Select a gene:", choices = genes_6283, selected = genes_6283[1], selectize = TRUE)
                ),
                
                mainPanel(
@@ -153,7 +172,7 @@ ui <- fluidPage(
                sidebarPanel(
                  width = 2,
                  # Dropdown for gene selection
-                 selectInput("selected_gene_scatter", "Select a gene:", choices = genes, selected = genes[1], selectize = TRUE)
+                 selectInput("selected_gene_scatter", "Select a gene:", choices = genes_all, selected = genes_all[1], selectize = TRUE)
                ),
                
                mainPanel(
@@ -173,8 +192,7 @@ ui <- fluidPage(
                         tags$li(strong("TCGAmutations:"), " Source for somatic mutations from TCGA cohorts"),
                         tags$li(strong("DepMap:"), "Used for comparison with predicted cancer dependency scores")
                       ),
-                      p("This web application was developed by Yantong Cui at Viswanathan Lab."),
-                      p("This project is funded by ...")
+                      p("This web application was developed by Yantong Cui at Viswanathan Lab.")
                )
              ),
              #### add another section for data sources (2 columns: 1column for subtype name and 2nd column for link of the study)
@@ -182,7 +200,7 @@ ui <- fluidPage(
                column(9,
                       h3("Data Sources:"),
                       DTOutput("dataSources_table")
-                      ),
+               ),
              ),
              fluidRow(
                column(12,
@@ -194,554 +212,485 @@ ui <- fluidPage(
   )
 )
 
-
-# Define server logic for generating the boxplot
+# --------------------------------- server -------------------------------------
 server <- function(input, output, session) {
   
+  # Cache per-gene frames so we don't reconstruct on every downstream reactive
+  gene_plot_data <- reactive({
+    req(input$selected_gene)
+    plot_data[[input$selected_gene]]
+  }) %>% bindCache(input$selected_gene)
+  
+  ref_plot_data <- reactive({
+    req(input$selected_gene)
+    ref_data[[input$selected_gene]]
+  }) %>% bindCache(input$selected_gene)
+  
+  sub_mutation <- reactive({
+    if (is.null(input$gene_mutated)) return(mutation_df[0, c("Tumor_Sample_ID","Hugo_Symbol")])
+    mutation_df[mutation_df$Hugo_Symbol == input$gene_mutated, c("Tumor_Sample_ID","Hugo_Symbol"), drop = FALSE]
+  }) %>% bindCache(input$gene_mutated)
+  
   grouping_l2_choices <- reactive({
-    req(input$selected_gene, input$selected_grouping_l1)  # Ensure inputs are not NULL
-    plot_data_subset <- plot_data[[input$selected_gene]]
-    unique(plot_data_subset$Grouping_L2[plot_data_subset$Grouping_L1 == input$selected_grouping_l1])
-  })
+    req(input$selected_gene, input$selected_grouping_l1)
+    pdf <- gene_plot_data()
+    unique(pdf$Grouping_L2[pdf$Grouping_L1 == input$selected_grouping_l1])
+  }) %>% bindCache(input$selected_gene, input$selected_grouping_l1)
   
-  
-  # After users select the RNA-seq type, the level-3 selection pops up
   output$grouping_l2_ui <- renderUI({
-    req(input$selected_grouping_l1, grouping_l2_choices())
-    
-    # Grab the previous selection directly here
-    prev_selection <- isolate(input$selected_grouping_l2)
+    req(input$selected_grouping_l1)
     choices <- grouping_l2_choices()
+    req(length(choices) > 0)
     
-    selected <- if (!is.null(prev_selection) && prev_selection %in% grouping_l2_choices()) {
-      prev_selection
-    } else {
-      grouping_l2_choices()[1]
-    }
+    prev_selection <- isolate(input$selected_grouping_l2)
+    selected <- if (!is.null(prev_selection) && prev_selection %in% choices) prev_selection else choices[1]
     
-    # level 3 Subtype dropdown list UI
     dropdown_ui <- selectInput(
       inputId = "selected_grouping_l2",
       label = "Select subtype:",
-      choices = grouping_l2_choices(),
+      choices = choices,
       selected = selected,
       selectize = TRUE
     )
     
-    # Checkbox UI
     additional_ui <- if (input$selected_grouping_l1 == "TCGA Lineages") {
       tagList(
         checkboxInput("tcga_all_lineages", "Compare All Lineages", value = FALSE),
         conditionalPanel(
           condition = "input.tcga_all_lineages",
-          checkboxInput("mutation_button", "Show Mutations", value = FALSE)
+          selectInput(
+            inputId = "gene_mutated",
+            label = "Show mutations - Select gene:",
+            choices = genes_6283,
+            selected = genes_6283[1],
+            selectize = TRUE
+          )
         )
       )
     } else {
       checkboxInput("compare_all_checkbox", "Compare All", value = FALSE)
     }
     
-    # Combine dropdown + conditionally displayed checkboxes
-    tagList(
-      dropdown_ui,
-      additional_ui
-    )
+    tagList(dropdown_ui, additional_ui)
   })
   
+  # Keep selected gene synced across tabs 
+  observeEvent(input$selected_gene, {
+    if (!identical(input$selected_gene_module2, input$selected_gene))
+      updateSelectInput(session, "selected_gene_module2", selected = input$selected_gene)
+    if (!identical(input$selected_gene_feature, input$selected_gene))
+      updateSelectInput(session, "selected_gene_feature", selected = input$selected_gene)
+    if (!identical(input$selected_gene_scatter, input$selected_gene))
+      updateSelectInput(session, "selected_gene_scatter", selected = input$selected_gene)
+  }, ignoreInit = TRUE)
   
+  # -------------------- Dependency Visualizations -----------------------
   output$boxplot_plot <- renderPlotly({
+    # Use cached frames and reuse local variables to avoid incidental copies
+    gene_plot_data_local <- gene_plot_data()
+    ref_plot_data_local  <- ref_plot_data()
     
-    # Get the data for the selected gene
-    gene_plot_data <- plot_data[[input$selected_gene]]
-    sub_mutation <- mutation_df[mutation_df$Hugo_Symbol == input$selected_gene, ]
+    # factor only if needed 
+    if (!is.factor(gene_plot_data_local$Grouping_L2))
+      gene_plot_data_local$Grouping_L2 <- factor(gene_plot_data_local$Grouping_L2)
     
-    gene_plot_data$Grouping_L2 <- as.factor(gene_plot_data$Grouping_L2)
-    
-    ref_plot_data <- ref_data[[input$selected_gene]]
-    
-    
-    if (input$selected_grouping_l1 == "TCGA Lineages"){
-      if (!is.null(input$tcga_all_lineages) && input$tcga_all_lineages){
-        subset_data <- gene_plot_data[gene_plot_data$Tumor_type == "TCGA_all",]
-        subset_data$mutation <- ifelse(subset_data$Tumor_Sample_ID %in% sub_mutation$Tumor_Sample_ID,
-                                       "mutated",
-                                       "not-mutated")
-        p_val <- NA
-        
-        
-        colors <- c(
-          "#1f77b4", "#ff7f0e", "#2ca02c", "#AC6A9F", "#9467bd", "#008080", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf",
-          "#aec7e8", "#ffbb78", "#98df8a", "#ff9896", "#c5b0d5", "#c49c94", "#f7b6d2", "#c7c7c7", "#dbdb8d", "#9edae5",
-          "#393b79", "#637939", "#8c6d31", "#5f9ea0", "#FFE119", "#5254a3", "#6b6ecf", "#9c9ede", "#cedb9c", "#e7cb94",
-          "#e7ba52", "#bd9e39", "#8c6d78"
-        )
-        
-        study_colors <- setNames(colors[1:length(unique(subset_data$Study.Abbreviation))], unique(subset_data$Study.Abbreviation))
-        
-        if (!is.null(input$mutation_button) && input$mutation_button){
-          p1 <- plot_ly(
-            data = subset_data,
-            x = ~as.factor(Study.Abbreviation),
-            y = ~Chronos_score,
-            type = 'box',
-            boxpoints = 'all',
-            jitter = 0.3,
-            pointpos = 0,
-            marker = list(
-              size = 3, 
-              opacity = 0.5),
-            color = ~as.factor(Study.Abbreviation),
-            colors = colors,
-            text = ~paste('Tumor Lineage:', Study.Abbreviation, '<br>Tumor ID:', Tumor_Sample_ID, '<br>Chronos score:', Chronos_score),  # Tooltip info
-            hoverinfo = 'text',               # Show only the text info on hover
-            name = 'TCGA Tumor All Lineages'
-          ) %>% add_trace(
-            data = subset_data[subset_data$mutation == "mutated", ],  # Select only mutated samples
-            x = ~as.factor(Study.Abbreviation),
-            y = ~Chronos_score,
-            type = 'scatter',
-            mode = 'markers',
-            marker = list(size = 5, color = "darkred", opacity = 1),  # Highlighted points in dark red
-            text = ~paste('Tumor Lineage:', Study.Abbreviation, '<br>Tumor ID:', Tumor_Sample_ID, '<br>Chronos score:', Chronos_score),  
-            hoverinfo = 'text',
-            showlegend = TRUE,
-            name = "Mutated Samples"
-          )
-        } else{
-          p1 <- plot_ly(
-            data = subset_data,
-            x = ~as.factor(Study.Abbreviation),
-            y = ~Chronos_score,
-            type = 'box',
-            boxpoints = 'all',
-            jitter = 0.3,
-            pointpos = 0,
-            marker = list(
-              size = 3, 
-              opacity = 0.5),
-            color = ~as.factor(Study.Abbreviation),
-            colors = colors,
-            text = ~paste('Tumor Lineage:', Study.Abbreviation, '<br>Tumor ID:', Tumor_Sample_ID, '<br>Chronos score:', Chronos_score),  # Tooltip info
-            hoverinfo = 'text',               # Show only the text info on hover
-            name = 'TCGA Tumor All Lineages'
-          ) 
-        }
-        
-        
-        p2 <- plot_ly(
-          data = ref_plot_data,
-          y = ~Chronos_score,               # Chronos scores on the y-axis for the reference data
-          type = 'box',                     # Boxplot type
-          boxpoints = 'all',                # Show all data points on the same box
-          jitter = 0.3,                     # Add some jitter to prevent points from overlapping
-          pointpos = 0,                  # Position the points inside the box
-          marker = list(size = 3, opacity = 0.9, color = '#EF8636'),  # Uniform color for the reference plot
-          text = ~paste('Cellline Name:', CellLineName, '<br>Chronos score:', Chronos_score),  # Tooltip info
-          hoverinfo = 'text',               # Show only the text info on hover
-          color = ~as.factor(Gene),
-          colors = "#EF8636",
-          name = 'DepMap Mean Chronos Scores'
-        )
-        
-        # Combine with subplot
-        subplot(p1, p2, nrows = 1, shareY = TRUE) %>%
-          layout(
-            title = list(
-              text = paste0("Boxplots of Chronos_scores for ", input$selected_gene),
-              x = 0.5
-            ),
-            yaxis = list(title = "Chronos Scores"),
-            showlegend = FALSE,
-            margin = list(t = 100, b = 100),  # Increased bottom margin for better label spacing
-            xaxis = list(
-              domain = c(0, 0.97),
-              tickangle = 90,  # Rotate x-axis labels
-              title = "TCGA Tumor Lineages"
-            ),
-            xaxis2 = list(
-              domain = c(0.98, 1),
-              tickangle = 90  # Rotate the label for the last box
-            )
-          )
-
-      } else {
-        subset_data <- gene_plot_data[gene_plot_data$Grouping_L2 == input$selected_grouping_l2, ]
-        p_val <- suppressWarnings(wilcox.test(subset_data$Chronos_score, ref_plot_data$Chronos_score, alternative="two.sided"))$p.value
-        
-        
-        # Create the first boxplot for gene_data
-        gene_boxplot <- plot_ly(
-          data = subset_data,
-          y = ~Chronos_score,               # Chronos scores on the y-axis
-          type = 'box',                     # Boxplot type
-          boxpoints = 'all',                # Show all data points on the same box
-          jitter = 0.3,                     # Add some jitter to prevent points from overlapping
-          pointpos = 0,                  # Position the points inside the box
-          marker = list(size = 7, opacity = 0.5),  # Color points by Tumor_type
-          text = ~paste('Type:', Grouping_L2, '<br>ID:', Tumor_ID, '<br>Chronos score:', Chronos_score),  # Tooltip info
-          hoverinfo = 'text',               # Show only the text info on hover
-          name = paste0(input$selected_grouping_l2, "<br>Predicted Chronos Scores")
-        )
-        
-        # Create the second boxplot for ref_plot_data
-        ref_boxplot <- plot_ly(
-          data = ref_plot_data,
-          y = ~Chronos_score,               # Chronos scores on the y-axis for the reference data
-          type = 'box',                     # Boxplot type
-          boxpoints = 'all',                # Show all data points on the same box
-          jitter = 0.3,                     # Add some jitter to prevent points from overlapping
-          pointpos = 0,                  # Position the points inside the box
-          marker = list(size = 7, opacity = 0.5),  # Uniform color for the reference plot
-          text = ~paste('Cellline Name:', CellLineName, '<br>Chronos score:', Chronos_score),  # Tooltip info
-          hoverinfo = 'text',               # Show only the text info on hover
-          name = 'DepMap Mean Chronos Scores'
-        )
-        
-        # Combine the two boxplots side by side using subplot
-        subplot(gene_boxplot, ref_boxplot, nrows = 1, shareY = TRUE) %>%
-          layout(
-            title = list(
-              text = paste0("Boxplots of Chronos Scores for ", input$selected_gene),
-              x=0.5
-            ),
-            annotations = list(
-              list(
-                text = paste0("p-value: ", format(p_val, digits = 3, scientific=TRUE)),
-                x=1.15,
-                y=0.85,
-                showarrow = FALSE,
-                xref="paper",
-                yref="paper",
-                xanchor="center",
-                yanchor="top",
-                font=list(size=16)
-              )
-            ),
-            yaxis = list(title = "Chronos Scores"),
-            showlegend = TRUE,              # Show legend for Tumor_type colors
-            margin = list(t = 100, b = 100),  # Adjust margins for better spacing
-            xaxis = list(domain = c(0, 0.45)), # First boxplot occupies 45% of width
-            xaxis2 = list(domain = c(0.55, 1)) # Second boxplot starts after 55%
-          )
-      }
-    } else{
-      if (!is.null(input$compare_all_checkbox) && input$compare_all_checkbox) {
-        
-        subset_data <- gene_plot_data[gene_plot_data$Grouping_L1 == input$selected_grouping_l1, ]
-        subset_data <- droplevels(subset_data) # drop unused levels
-        subset_data$Grouping_L2 <- factor(subset_data$Grouping_L2, levels = unique(subset_data$Grouping_L2))
-
-        p_val <- NA
-        
-        if(input$selected_grouping_l1 == "Kidney Tumor Subtypes"){
-          colors <- c(
-            "#1f77b4", "#e7ba52", "#2ca02c", "#AC6A9F", "#9467bd", "#008080", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf",
-            "#aec7e8", "#ffbb78", "#98df8a", "#ff9896", "#c5b0d5", "#c49c94", "#f7b6d2", "#c7c7c7", "#dbdb8d", "#9edae5",
-            "#393b79", "#637939", "#8c6d31", "#5f9ea0"
-          )
-          
-          study_colors <- setNames(colors[1:length(unique(subset_data$Study.Abbreviation))], unique(subset_data$Study.Abbreviation))
-        } else if (input$selected_grouping_l1 == "Sarcoma Subtypes"){
-          colors <- c(
-            "#1f77b4", "#ffbb78", "#2ca02c", "#AC6A9F", "#9467bd", "#008080", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf"
-          )
-          
-          study_colors <- setNames(colors[1:length(unique(subset_data$Study.Abbreviation))], unique(subset_data$Study.Abbreviation))
+    if (input$selected_grouping_l1 == "TCGA Lineages") {
+      if (!is.null(input$tcga_all_lineages) && input$tcga_all_lineages) {
+        subset_data <- gene_plot_data_local[gene_plot_data_local$Tumor_type == "TCGA_all", , drop = FALSE]
+        sm <- sub_mutation()
+        if (nrow(sm)) {
+          subset_data$mutation <- ifelse(subset_data$Tumor_Sample_ID %in% sm$Tumor_Sample_ID, "mutated", "not-mutated")
         } else {
-          colors <- c(
-            "#1f77b4", "#c5b0d5", "#5f9ea0"
-          )
-          study_colors <- setNames(colors[1:length(unique(subset_data$Study.Abbreviation))], unique(subset_data$Study.Abbreviation))
+          subset_data$mutation <- "not-mutated"
         }
         
+        colors <- TCGA_COLORS[seq_len(min(length(TCGA_COLORS), length(unique(subset_data$Study.Abbreviation))))]
         
-        
+        # main box
         p1 <- plot_ly(
           data = subset_data,
-          x = ~as.factor(Grouping_L2),
+          x = ~as.factor(Study.Abbreviation),
           y = ~Chronos_score,
           type = 'box',
           boxpoints = 'all',
           jitter = 0.3,
           pointpos = 0,
-          marker = list(
-            size = 5, 
-            opacity = 0.5),
-          color = ~as.factor(Grouping_L2),
+          marker = list(size = 3, opacity = 0.5),
+          color = ~as.factor(Study.Abbreviation),
           colors = colors,
-          text = ~paste('Tumor Subtype:', Grouping_L2, '<br>ID:', Tumor_ID, '<br>Chronos score:', Chronos_score),  # Tooltip info
-          hoverinfo = 'text',               # Show only the text info on hover
-          name = paste('All', input$selected_grouping_l1)
-        ) 
-        
-        
-        p2 <- plot_ly(
-          data = ref_plot_data,
-          y = ~Chronos_score,               # Chronos scores on the y-axis for the reference data
-          type = 'box',                     # Boxplot type
-          boxpoints = 'all',                # Show all data points on the same box
-          jitter = 0.3,                     # Add some jitter to prevent points from overlapping
-          pointpos = 0,                  # Position the points inside the box
-          marker = list(size = 5, opacity = 0.9, color = '#EF8636'),  # Uniform color for the reference plot
-          text = ~paste('Cellline Name:', CellLineName, '<br>Chronos score:', Chronos_score),  # Tooltip info
-          hoverinfo = 'text',               # Show only the text info on hover
-          color = ~as.factor(Gene),
-          colors = "#EF8636",
-          name = 'DepMap Mean Chronos Scores'
+          text = ~paste('Tumor Lineage:', Study.Abbreviation, '<br>Tumor ID:', Tumor_Sample_ID, '<br>Chronos score:', Chronos_score),
+          hoverinfo = 'text',
+          name = 'TCGA Tumor All Lineages'
         )
         
-        # Combine with subplot
-        subplot(p1, p2, nrows = 1, shareY = TRUE) %>%
-          layout(
-            title = list(
-              text = paste0("Boxplots of Chronos_scores for ", input$selected_gene),
-              x = 0.5
-            ),
-            yaxis = list(title = "Chronos Scores"),
-            showlegend = FALSE,
-            margin = list(t = 100, b = 100),  # Increased bottom margin for better label spacing
-            xaxis = list(
-              domain = c(0, 0.94),
-              tickangle = 90,  # Rotate x-axis labels
-              title = paste("All", input$selected_grouping_l1)
-            ),
-            xaxis2 = list(
-              domain = c(0.95, 1),
-              tickangle = 90  # Rotate the label for the last box
-            )
+        if (!is.null(input$gene_mutated)) {
+          p1 <- p1 %>% add_trace(
+            data = subset_data[subset_data$mutation == "mutated", , drop = FALSE],
+            x = ~as.factor(Study.Abbreviation),
+            y = ~Chronos_score,
+            type = 'scatter',
+            mode = 'markers',
+            marker = list(size = 5, color = "darkred", opacity = 1),
+            text = ~paste('Tumor Lineage:', Study.Abbreviation, '<br>Tumor ID:', Tumor_Sample_ID, '<br>Chronos score:', Chronos_score),
+            hoverinfo = 'text',
+            showlegend = TRUE,
+            name = "Mutated Samples"
           )
+        }
         
+        p2 <- plot_ly(
+          data = ref_plot_data_local,
+          y = ~Chronos_score,
+          type = 'box',
+          boxpoints = 'all',
+          jitter = 0.3,
+          pointpos = 0,
+          marker = list(size = 3, opacity = 0.9, color = '#EF8636'),
+          text = ~paste('Cellline Name:', CellLineName, '<br>Chronos score:', Chronos_score),
+          hoverinfo = 'text',
+          color = ~as.factor(Gene),
+          colors = "#EF8636",
+          name = 'DepMap Chronos Scores'
+        )
+        
+        return(
+          subplot(p1, p2, nrows = 1, shareY = TRUE) %>%
+            layout(
+              title = list(text = paste0("Boxplots of Chronos Scores for ", input$selected_gene), x = 0.5),
+              yaxis = list(title = "Chronos Scores"),
+              showlegend = FALSE,
+              margin = list(t = 100, b = 100),
+              xaxis = list(domain = c(0, 0.97), tickangle = 90, title = "TCGA Tumor Lineages"),
+              xaxis2 = list(domain = c(0.98, 1), tickangle = 90)
+            )
+        )
       } else {
-        subset_data <- gene_plot_data[gene_plot_data$Grouping_L2 == input$selected_grouping_l2, ]
-        p_val <- suppressWarnings(wilcox.test(subset_data$Chronos_score, ref_plot_data$Chronos_score, alternative="two.sided"))$p.value
+        subset_data <- gene_plot_data_local[gene_plot_data_local$Grouping_L2 == input$selected_grouping_l2, , drop = FALSE]
+        p_val <- suppressWarnings(wilcox.test(subset_data$Chronos_score, ref_plot_data_local$Chronos_score, alternative = "two.sided"))$p.value
         
-        # Create the first boxplot for gene_data
         gene_boxplot <- plot_ly(
           data = subset_data,
-          y = ~Chronos_score,               # Chronos scores on the y-axis
-          type = 'box',                     # Boxplot type
-          boxpoints = 'all',                # Show all data points on the same box
-          jitter = 0.3,                     # Add some jitter to prevent points from overlapping
-          pointpos = 0,                  # Position the points inside the box
-          marker = list(size = 7, opacity = 0.5),  # Color points by Tumor_type
-          text = ~paste('Type:', Grouping_L2, '<br>ID:', Tumor_ID, '<br>Chronos score:', Chronos_score),  # Tooltip info
-          hoverinfo = 'text',               # Show only the text info on hover
+          y = ~Chronos_score,
+          type = 'box',
+          boxpoints = 'all',
+          jitter = 0.3,
+          pointpos = 0,
+          marker = list(size = 7, opacity = 0.5),
+          text = ~paste('Type:', Grouping_L2, '<br>ID:', Tumor_ID, '<br>Chronos score:', Chronos_score),
+          hoverinfo = 'text',
           name = paste0(input$selected_grouping_l2, "<br>Predicted Chronos Scores")
         )
         
-        # Create the second boxplot for ref_plot_data
         ref_boxplot <- plot_ly(
-          data = ref_plot_data,
-          y = ~Chronos_score,               # Chronos scores on the y-axis for the reference data
-          type = 'box',                     # Boxplot type
-          boxpoints = 'all',                # Show all data points on the same box
-          jitter = 0.3,                     # Add some jitter to prevent points from overlapping
-          pointpos = 0,                  # Position the points inside the box
-          marker = list(size = 7, opacity = 0.5),  # Uniform color for the reference plot
-          text = ~paste('Cellline Name:', CellLineName, '<br>Chronos score:', Chronos_score),  # Tooltip info
-          hoverinfo = 'text',               # Show only the text info on hover
-          name = 'DepMap Mean Chronos Scores'
+          data = ref_plot_data_local,
+          y = ~Chronos_score,
+          type = 'box',
+          boxpoints = 'all',
+          jitter = 0.3,
+          pointpos = 0,
+          marker = list(size = 7, opacity = 0.5),
+          text = ~paste('Cellline Name:', CellLineName, '<br>Chronos score:', Chronos_score),
+          hoverinfo = 'text',
+          name = 'DepMap Chronos Scores'
         )
         
-        # Combine the two boxplots side by side using subplot
-        subplot(gene_boxplot, ref_boxplot, nrows = 1, shareY = TRUE) %>%
-          layout(
-            title = list(
-              text = paste0("Boxplots of Chronos Scores for ", input$selected_gene),
-              x=0.5
-            ),
-            annotations = list(
-              list(
-                text = paste0("p-value: ", format(p_val, digits = 3, scientific=TRUE)),
-                x=1.15,
-                y=0.85,
-                showarrow = FALSE,
-                xref="paper",
-                yref="paper",
-                xanchor="center",
-                yanchor="top",
-                font=list(size=16)
-              )
-            ),
-            yaxis = list(title = "Chronos Scores"),
-            showlegend = TRUE,              # Show legend for Tumor_type colors
-            margin = list(t = 100, b = 100),  # Adjust margins for better spacing
-            xaxis = list(domain = c(0, 0.45)), # First boxplot occupies 45% of width
-            xaxis2 = list(domain = c(0.55, 1)) # Second boxplot starts after 55%
+        return(
+          subplot(gene_boxplot, ref_boxplot, nrows = 1, shareY = TRUE) %>%
+            layout(
+              title = list(text = paste0("Boxplots of Chronos Scores for ", input$selected_gene), x = 0.5),
+              annotations = list(
+                list(
+                  text = paste0("p-value: ", format(p_val, digits = 3, scientific = TRUE)),
+                  x = 1.15, y = 0.85, showarrow = FALSE, xref = "paper", yref = "paper",
+                  xanchor = "center", yanchor = "top", font = list(size = 16)
+                )
+              ),
+              yaxis = list(title = "Chronos Scores"),
+              showlegend = TRUE,
+              margin = list(t = 100, b = 100),
+              xaxis = list(domain = c(0, 0.45)),
+              xaxis2 = list(domain = c(0.55, 1))
+            )
+        )
+      }
+    } else {
+      if (!is.null(input$compare_all_checkbox) && input$compare_all_checkbox) {
+        subset_data <- gene_plot_data_local[gene_plot_data_local$Grouping_L1 == input$selected_grouping_l1, , drop = FALSE]
+        subset_data <- droplevels(subset_data)
+        subset_data$Grouping_L2 <- factor(subset_data$Grouping_L2, levels = unique(subset_data$Grouping_L2))
+        
+        if (input$selected_grouping_l1 == "Kidney Tumor Subtypes") {
+          subtype_legend_map <- data.frame(
+            Grouping_L2 = c("Brugarolas_ccRCC","Braun_ccRCC","Wang2016_CDC","Wang2020_PEComa_RenalAML","Drost_MRTK",
+                            "Drost_NephrogenicRest","Drost_pediatricRCC","Msaouel_RMC","Sun_tRCC","TCGA_pRCCT1",
+                            "TCGA_pRCCT2","TCGA_sRCC","TCGA_tRCC","TCGA_ccRCC","TCGA_chRCC","TCGA_CIMPpRCC",
+                            "TCGA_MDchRCC","TCGA_FHdeficientRCC","TCGA_Eosinophilic_chRCC","TCGA_oncocytoma",
+                            "Brugarolas_tRCC","Drost_Wilms","Qu_tRCC","Coutinho_Wilms"),
+            color_group = c("ccRCC","ccRCC","CDC","RenalAML","MRTK","NephrogenicRest","pediatricRCC","RMC",
+                            "tRCC","pRCC","pRCC","sRCC","tRCC","ccRCC","chRCC","pRCC","chRCC","FHdeficientRCC",
+                            "chRCC","oncocytoma","tRCC","Wilms","tRCC","Wilms"),
+            stringsAsFactors = FALSE
           )
+          legend_colors <- c(
+            ccRCC="#1f77b4", CDC="#2ca02c", RenalAML="#f7b6d2", MRTK="#9467bd",
+            NephrogenicRest="#008080", pediatricRCC="#e377c2", RMC="#7f7f7f", tRCC="#AC6A9F",
+            pRCC="#aec7e8", sRCC="#ffbb78", chRCC="#c49c94", FHdeficientRCC="#dbdb8d",
+            oncocytoma="#5f9ea0", Wilms="#9edae5"
+          )
+          subset_data <- merge(subset_data, subtype_legend_map, by = "Grouping_L2", all.x = TRUE)
+          
+          p1 <- plot_ly(
+            data = subset_data,
+            x = ~as.factor(Grouping_L2),
+            y = ~Chronos_score,
+            type = 'box',
+            boxpoints = 'all',
+            jitter = 0.3,
+            pointpos = 0,
+            marker = list(size = 5, opacity = 0.5),
+            color = ~color_group,
+            split = ~color_group,
+            colors = legend_colors,
+            text = ~paste('Tumor Subtype:', Grouping_L2, '<br>ID:', Tumor_ID, '<br>Chronos score:', Chronos_score),
+            hoverinfo = 'text',
+            name = ~color_group,
+            showlegend = TRUE
+          )
+        } else if (input$selected_grouping_l1 == "Sarcoma Subtypes") {
+          colors <- c("#1f77b4", "#ffbb78", "#2ca02c", "#AC6A9F", "#9467bd", "#008080", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf")
+          p1 <- plot_ly(
+            data = subset_data,
+            x = ~as.factor(Grouping_L2),
+            y = ~Chronos_score,
+            type = 'box',
+            boxpoints = 'all',
+            jitter = 0.3,
+            pointpos = 0,
+            marker = list(size = 5, opacity = 0.5),
+            color = ~as.factor(Grouping_L2),
+            colors = colors,
+            text = ~paste('Tumor Subtype:', Grouping_L2, '<br>ID:', Tumor_ID, '<br>Chronos score:', Chronos_score),
+            hoverinfo = 'text',
+            name = paste('All', input$selected_grouping_l1)
+          )
+        } else {
+          colors <- c("#1f77b4", "#c5b0d5", "#5f9ea0")
+          p1 <- plot_ly(
+            data = subset_data,
+            x = ~as.factor(Grouping_L2),
+            y = ~Chronos_score,
+            type = 'box',
+            boxpoints = 'all',
+            jitter = 0.3,
+            pointpos = 0,
+            marker = list(size = 5, opacity = 0.5),
+            color = ~as.factor(Grouping_L2),
+            colors = colors,
+            text = ~paste('Tumor Subtype:', Grouping_L2, '<br>ID:', Tumor_ID, '<br>Chronos score:', Chronos_score),
+            hoverinfo = 'text',
+            name = paste('All', input$selected_grouping_l1)
+          )
+        }
+        
+        p2 <- plot_ly(
+          data = ref_plot_data_local,
+          y = ~Chronos_score,
+          type = 'box',
+          boxpoints = 'all',
+          jitter = 0.3,
+          pointpos = 0,
+          marker = list(size = 5, opacity = 0.9, color = '#EF8636'),
+          text = ~paste('Cellline Name:', CellLineName, '<br>Chronos score:', Chronos_score),
+          hoverinfo = 'text',
+          color = ~as.factor(Gene),
+          colors = '#EF8636',
+          name = 'DepMap Chronos Scores'
+        )
+        
+        return(
+          subplot(p1, p2, nrows = 1, shareY = TRUE) %>%
+            layout(
+              title = list(text = paste0("Boxplots of Chronos Scores for ", input$selected_gene), x = 0.5),
+              yaxis = list(title = "Chronos Scores"),
+              showlegend = TRUE,
+              margin = list(t = 100, b = 100),
+              xaxis = list(domain = c(0, 0.94), tickangle = 90, title = paste("All", input$selected_grouping_l1)),
+              xaxis2 = list(domain = c(0.95, 1), tickangle = 90)
+            )
+        )
+      } else {
+        subset_data <- gene_plot_data_local[gene_plot_data_local$Grouping_L2 == input$selected_grouping_l2, , drop = FALSE]
+        p_val <- suppressWarnings(wilcox.test(subset_data$Chronos_score, ref_plot_data_local$Chronos_score, alternative = "two.sided"))$p.value
+        
+        gene_boxplot <- plot_ly(
+          data = subset_data,
+          y = ~Chronos_score,
+          type = 'box',
+          boxpoints = 'all',
+          jitter = 0.3,
+          pointpos = 0,
+          marker = list(size = 7, opacity = 0.5),
+          text = ~paste('Type:', Grouping_L2, '<br>ID:', Tumor_ID, '<br>Chronos score:', Chronos_score),
+          hoverinfo = 'text',
+          name = paste0(input$selected_grouping_l2, "<br>Predicted Chronos Scores")
+        )
+        
+        ref_boxplot <- plot_ly(
+          data = ref_plot_data_local,
+          y = ~Chronos_score,
+          type = 'box',
+          boxpoints = 'all',
+          jitter = 0.3,
+          pointpos = 0,
+          marker = list(size = 7, opacity = 0.5),
+          text = ~paste('Cellline Name:', CellLineName, '<br>Chronos score:', Chronos_score),
+          hoverinfo = 'text',
+          name = 'DepMap Chronos Scores'
+        )
+        
+        return(
+          subplot(gene_boxplot, ref_boxplot, nrows = 1, shareY = TRUE) %>%
+            layout(
+              title = list(text = paste0("Boxplots of Chronos Scores for ", input$selected_gene), x = 0.5),
+              annotations = list(
+                list(
+                  text = paste0("p-value: ", format(p_val, digits = 3, scientific = TRUE)),
+                  x = 1.15, y = 0.85, showarrow = FALSE, xref = "paper", yref = "paper",
+                  xanchor = "center", yanchor = "top", font = list(size = 16)
+                )
+              ),
+              yaxis = list(title = "Chronos Scores"),
+              showlegend = TRUE,
+              margin = list(t = 100, b = 100),
+              xaxis = list(domain = c(0, 0.45)),
+              xaxis2 = list(domain = c(0.55, 1))
+            )
+        )
       }
     }
-  })
+  }) %>% bindCache(
+    input$selected_gene, input$selected_grouping_l1, input$selected_grouping_l2,
+    input$tcga_all_lineages, input$gene_mutated, input$compare_all_checkbox
+  )
   
-  ################## Tab for Module & Feature Selection 
+  # -------------------- Module & Feature Selection ------------------------
   output$bar_plot2 <- renderPlotly({
     gene_df <- module_selection[[input$selected_gene_module2]]
     
-    # Convert Number_of_features to ordered factor based on numeric values
     sub_df_sorted <- gene_df %>%
-      mutate(Number_of_features = factor(Number_of_features, 
-                                         levels = unique(gene_df$Number_of_features[order(as.numeric(gsub("N", "", gene_df$Number_of_features)))])))
+      mutate(Number_of_features = factor(
+        Number_of_features,
+        levels = unique(gene_df$Number_of_features[order(as.numeric(gsub("N", "", gene_df$Number_of_features)))])
+      ))
     
-    sub_df_sorted$bar_colors <- ifelse(sub_df_sorted$Correl_Coeffs_5CV == max(sub_df_sorted$Correl_Coeffs_5CV),
-                                       "Best Performance",
-                                       sub_df_sorted$Module)
+    max_corr <- max(sub_df_sorted$Correl_Coeffs_5CV, na.rm = TRUE)
+    highlight_best <- isTRUE(input$highest_bar)
     
-    
-    # Define colors
-    module_colors <- setNames(c("#aec7e8", "#c5b6d2", "#cedb9c", "#fffacd", "#f7b6d2", "darkred"),
-                              c("SVR", "ridge_regression", "linear_SVR", "lasso_regression", "elasticnet_regression", "Best Performance"))
-    
-    if (!is.null(input$highest_bar) && input$highest_bar){
-      plot_ly(
-        data = sub_df_sorted,
-        x = ~Number_of_features,
-        y = ~Correl_Coeffs_5CV,
-        color = ~Module,
-        colors = module_colors,
-        type = "bar",
-        marker = list(opacity = 0.3),
-        textposition = "none",
-        text = ~paste("Model:", Module, "<br>Number of Features:", gsub("N", "", Number_of_features), "<br>Correlation:", round(Correl_Coeffs_5CV, 3)),
-        hoverinfo = "text"
-      ) %>%
-        add_trace(
-          data = sub_df_sorted[sub_df_sorted$Correl_Coeffs_5CV == max(sub_df_sorted$Correl_Coeffs_5CV), ],
-          x = ~Number_of_features,
-          y = ~Correl_Coeffs_5CV,
-          type = "bar",
-          mode = "markers",
-          marker = list(color = "darkred", opacity = 1),
-          textposition = "none",
-          text = ~paste("Model:", Module, "<br>Number of Features:", gsub("N", "", Number_of_features), "<br>Correlation:", round(Correl_Coeffs_5CV, 3)),
-          hoverinfo = "text",
-          showlegend = TRUE,
-          name = "Best Performance"
-        ) %>%
-        layout(
-          title = "Grouped Bar Plot: Model Performance",
-          xaxis = list(title = "Number of Features", categoryorder = "array", categoryarray = levels(sub_df_sorted$Number_of_features)),
-          yaxis = list(title = "5-fold CV Correlation of Predicted vs. Observed Chronos Score in Test Data (R)"),
-          barmode = "group"
-        )
+    p <- plot_ly()
+    for (mod in unique(sub_df_sorted$Module)) {
+      df_mod  <- sub_df_sorted[sub_df_sorted$Module == mod, , drop = FALSE]
+      is_best <- df_mod$Correl_Coeffs_5CV == max_corr
+      trace_color <- if (highlight_best && any(is_best)) ifelse(is_best, "darkred", BASE_BAR_COLORS[mod]) else BASE_BAR_COLORS[mod]
       
-    } else {
-      # Create grouped bar plot
-      plot_ly(sub_df_sorted,
-              x = ~Number_of_features,
-              y = ~Correl_Coeffs_5CV,
-              color = ~Module,
-              colors = module_colors,
-              type = "bar",
-              marker = list(opacity = 0.7),
-              textposition = "none",
-              text = ~paste("Model:", Module, "<br>Number of Features:", gsub("N", "", Number_of_features), "<br>Correlation:", round(Correl_Coeffs_5CV, 3)),
-              hoverinfo = "text") %>%
-        layout(
-          title = "Grouped Bar Plot: Model Performance",
-          xaxis = list(title = "Number of Features", categoryorder = "array", categoryarray = levels(sub_df_sorted$Number_of_features)),
-          yaxis = list(title = "5-fold CV Correlation of Predicted vs. Observed Chronos Score in Test Data (R)"),
-          barmode = "group"
-        )
+      p <- p %>% add_trace(
+        data = df_mod, x = ~Number_of_features, y = ~Correl_Coeffs_5CV, type = "bar",
+        name = mod, marker = list(color = trace_color, opacity = 0.7),
+        text = ~paste("Model:", Module,
+                      "<br>Number of Features:", gsub("N", "", Number_of_features),
+                      "<br>Correlation:", round(Correl_Coeffs_5CV, 3)),
+        hoverinfo = "text", textposition = "none"
+      )
     }
     
-  })
+    p %>% layout(
+      title = "Grouped Bar Plot: Model Performance",
+      xaxis = list(title = "Number of Features",
+                   categoryorder = "array",
+                   categoryarray = levels(sub_df_sorted$Number_of_features)),
+      yaxis = list(title = "5-fold CV Correlation of Predicted vs. Observed Chronos Score in Test Data (R)"),
+      barmode = "group"
+    )
+  }) %>% bindCache(input$selected_gene_module2, input$highest_bar)
   
-  
-  
-  ################## Tab for feature importance
+  # -------------------- Feature Importance -------------------------------
   output$feature_plot <- renderPlotly({
-    
     feature_df <- features_df[[input$selected_gene_feature]]
     
-    # Separate data for gray and red points
-    gray_points <- feature_df[feature_df$Rank > 10, ]
-    red_point <- feature_df[feature_df$Rank <= 10, ]
+    gray_points <- feature_df[feature_df$Rank > 10, , drop = FALSE]
+    red_point   <- feature_df[feature_df$Rank <= 10, , drop = FALSE]
     
     plot_ly() %>%
       add_trace(
-        data = gray_points,
-        type = "scatter",
-        mode = "markers",
-        x = ~Rank,
-        y = ~abs_coef,
+        data = gray_points, type = "scatter", mode = "markers",
+        x = ~Rank, y = ~abs_coef,
         marker = list(color = "lightgray", size = 5),
         textposition = "outside",
         text = ~paste('Feature:', Features, '<br>Coefficient:', Coefficients, '<br>Rank:', Rank),
-        hoverinfo = 'text',               # Show only the text info on hover
+        hoverinfo = 'text',
         name = "Lowly correlated Features"
       ) %>%
       add_trace(
-        data = red_point,
-        type = "scatter",
-        mode = "markers",
-        x = ~Rank,
-        y = ~abs_coef,
+        data = red_point, type = "scatter", mode = "markers",
+        x = ~Rank, y = ~abs_coef,
         marker = list(color = "darkred", size = 10),
         textposition = "outside",
         text = ~paste('Feature:', Features, '<br>Coefficient:', Coefficients, '<br>Rank:', Rank),
-        hoverinfo = 'text',               # Show only the text info on hover
+        hoverinfo = 'text',
         name = "Top correlated Features"
       ) %>%
       layout(
         title = paste0(input$selected_gene_feature, " Chronos Score Predictors"),
-        xaxis = list(title = "Feature Rank"),
-        yaxis = list(title = "Relative Feature Importance"),
-        showlegend = T
+        xaxis = list(title = "Feature Rank",
+                     zeroline = TRUE,
+                     range = c(-(max(feature_df$Rank))*0.05, max(feature_df$Rank+(max(feature_df$Rank))*0.05))),
+        yaxis = list(title = "Relative Feature Importance",
+                     zeroline = TRUE,
+                     range = c(-(max(feature_df$abs_coef))*0.05, max(feature_df$abs_coef+(max(feature_df$abs_coef))*0.05))),
+        showlegend = TRUE
       )
-  })
+  }) %>% bindCache(input$selected_gene_feature)
   
-  
-  
-  ################## Additional Tab for r
+  # -------------------- Prediction Consistency --------------------------
   output$scatter_plot <- renderPlotly({
-    models_df_sorted <- models_df[order(-models_df$Correl_Coeffs_5CV), ]
-    models_df_sorted$Rank <- 1:nrow(models_df_sorted)
+    models_df_sorted <- models_df[order(-models_df$Correl_Coeffs_5CV), , drop = FALSE]
+    models_df_sorted$Rank <- seq_len(nrow(models_df_sorted))
     
-    # Separate data for gray and red points
-    gray_points <- models_df_sorted[models_df_sorted$Gene_Name != input$selected_gene_scatter, ]
-    red_point <- models_df_sorted[models_df_sorted$Gene_Name == input$selected_gene_scatter, ]
+    gray_points <- models_df_sorted[models_df_sorted$Gene_Name != input$selected_gene_scatter, , drop = FALSE]
+    red_point   <- models_df_sorted[models_df_sorted$Gene_Name == input$selected_gene_scatter, , drop = FALSE]
     
     plot_ly() %>%
       add_trace(
-        data = gray_points,
-        type = "scatter",
-        mode = "markers",
-        x = ~Rank,
-        y = ~Correl_Coeffs_5CV,
+        data = gray_points, type = "scatter", mode = "markers",
+        x = ~Rank, y = ~Correl_Coeffs_5CV,
         marker = list(color = "lightgray", size = 5),
         textposition = "outside",
         text = ~paste('Gene:', Gene_Name, '<br>r:', Correl_Coeffs_5CV, '<br>Rank:', Rank),
-        hoverinfo = 'text',               # Show only the text info on hover
+        hoverinfo = 'text',
         name = "Unselected Genes"
       ) %>%
       add_trace(
-        data = red_point,
-        type = "scatter",
-        mode = "markers",
-        x = ~Rank,
-        y = ~Correl_Coeffs_5CV,
+        data = red_point, type = "scatter", mode = "markers",
+        x = ~Rank, y = ~Correl_Coeffs_5CV,
         marker = list(color = "darkred", size = 15),
         textposition = "outside",
         text = ~paste('Gene:', Gene_Name, '<br>r:', Correl_Coeffs_5CV, '<br>Rank:', Rank),
-        hoverinfo = 'text',               # Show only the text info on hover
+        hoverinfo = 'text',
         name = input$selected_gene_scatter
       ) %>%
       layout(
-        title = "Scatterplot of Averaged 5-Fold Cross-Validation Correlation Coefficients",
+        title = "Scatterplot of Averaged 5-Fold Cross-Validation Correlation Coefficients for the Best Model per Gene",
         xaxis = list(title = "Rank"),
         yaxis = list(title = "Correlation of Predicted vs. Observed Chronos Score in Test Data (R)"),
-        showlegend = T
+        showlegend = TRUE
       )
-  })
+  }) %>% bindCache(input$selected_gene_scatter)
   
+  # -------------------- Data sources table --------------------------
   output$dataSources_table <- renderDT({
-    datatable(dataSources_df, escape = FALSE, options = list(pageLength=5))
+    datatable(dataSources_df, escape = FALSE, options = list(pageLength = 5))
   })
-  
 }
-
 
 # Run the Shiny app
 shinyApp(ui = ui, server = server)
-
 
