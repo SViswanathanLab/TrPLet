@@ -2,7 +2,7 @@
 
 **Transcriptional Prediction of Lethality (TrPLet)**
 
-If used, please cite the most recent paper:
+If used, please cite the most recent version of the paper that is available:
 
 **_"Assembling a landscape of vulnerabilities across rare kidney cancers"_** (B. Li* & Sadagopan* et al.), bioRxiv 2024
 
