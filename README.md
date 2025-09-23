@@ -4,7 +4,7 @@
 
 If used, please cite the most recent version of the paper that is available:
 
-**_"Assembling a landscape of vulnerabilities across rare kidney cancers"_** (B. Li* & Sadagopan* et al.), bioRxiv 2024
+**_"A framework for target discovery in rare cancers"_** (B. Li* & Sadagopan* et al.), bioRxiv 2024
 
 ## Summary
 
