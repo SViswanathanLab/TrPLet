@@ -2,7 +2,9 @@
 
 **Transcriptional Prediction of Lethality (TrPLet)**
 
-If used, please cite: _"Assembling a landscape of vulnerabilities across rare kidney cancers"_ (Li* & Sadagopan* et al.)
+If used, please cite either:
+_"Assembling a landscape of vulnerabilities across rare kidney cancers"_ (Li* & Sadagopan* et al.), 
+_"Cancer target discovery enabled by transcriptome-based virtual CRISPR screening"_ (Sadagopan*, B. Li*, J. Li* et al.)
 
 ## Summary
 
