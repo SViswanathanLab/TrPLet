@@ -4,9 +4,9 @@
 
 If used, please cite the most recent paper:
 
-_"Assembling a landscape of vulnerabilities across rare kidney cancers"_ (B. Li* & Sadagopan* et al.), bioRxiv 2024
+**_"Assembling a landscape of vulnerabilities across rare kidney cancers"_** (B. Li* & Sadagopan* et al.), bioRxiv 2024
 
-_"Cancer target discovery enabled by transcriptome-based virtual CRISPR screening"_ (Sadagopan*, B. Li*, J. Li* et al.), bioRxiv 2025
+**_"Cancer target discovery enabled by transcriptome-based virtual CRISPR screening"_** (Sadagopan*, B. Li*, J. Li* et al.), bioRxiv 2025
 
 ## Summary
 
