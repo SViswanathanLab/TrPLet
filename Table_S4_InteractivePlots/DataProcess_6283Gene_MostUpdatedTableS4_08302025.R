@@ -6,8 +6,8 @@ library(stringr)
 library(maftools)
 
 # load Table S4 excel sheets
-Table_S4 <- excel_sheets("/Volumes/sviswanathan/users/ycui/TrPLet/TrPLet_Table_S4/0319_Updated/Table_S4.xlsx")
-Table_S4_sheets <- lapply(Table_S4, function(x) read_excel("/Volumes/sviswanathan/users/ycui/TrPLet/TrPLet_Table_S4/0319_Updated/Table_S4.xlsx", sheet=x))
+Table_S4 <- excel_sheets("/Users/yantong/TrPLet_RShiny/Table_S4.xlsx")
+Table_S4_sheets <- lapply(Table_S4, function(x) read_excel("/Users/yantong/TrPLet_RShiny/Table_S4.xlsx", sheet=x))
 Table_S4[28] <- "TCGA_sRCC"
 names(Table_S4_sheets) <- Table_S4
 # Remove columns "mean", "CCLE", and "diff" from each sheet in Table_S4_dfs
@@ -24,15 +24,15 @@ Table_S4_dfs[["TCGA_pRCCT2"]] <- Table_S4_dfs[["TCGA_pRCCT2"]] %>%
   select(c(37:99))
 
 genes <- Table_S4_dfs[[1]]$Gene
-saveRDS(genes, "/Volumes/sviswanathan/users/ycui/TrPLet/TrPLet_Table_S4/0319_Updated/TrPLet_RShiny/6283gene_names.rds")
+saveRDS(genes, "/Users/yantong/TrPLet_RShiny/6283gene_names.rds")
 
-TSS <- read.delim("/Volumes/sviswanathan/users/ycui/TrPLet/TrPLet_Table_S4/0319_Updated/tissueSourceSite.tsv", header=TRUE, sep="\t")
+TSS <- read.delim("/Users/yantong/TrPLet_RShiny/tissueSourceSite.tsv", header=TRUE, sep="\t")
 TSS$TSS.Code <- paste0("TCGA-", TSS$TSS.Code) # modify the TSS column to match with the column names in TCGA_all
-TCGA_abb <- read.delim("/Volumes/sviswanathan/users/ycui/TrPLet/TrPLet_Table_S4/0319_Updated/diseaseStudy.tsv", header=TRUE, sep="\t")
+TCGA_abb <- read.delim("/Users/yantong/TrPLet_RShiny/diseaseStudy.tsv", header=TRUE, sep="\t")
 map_df <- merge(TSS, TCGA_abb, by="Study.Name")
 
 # Annotate Unscreened_CCLE cellline name
-cellline_map <- read.delim("/Volumes/sviswanathan/users/ycui/TrPLet/TrPLet_Table_S4/0319_Updated/sample_info.csv", header=T, sep=",")
+cellline_map <- read.delim("/Users/yantong/TrPLet_RShiny/sample_info.csv", header=T, sep=",")
 cellline_map <- setNames(cellline_map$stripped_cell_line_name, cellline_map$DepMap_ID)
 cellline_map <- append(cellline_map, c("Gene"="Gene"))
 colnames(Table_S4_dfs[["Unscreened_CCLE"]]) <- ifelse(colnames(Table_S4_dfs[["Unscreened_CCLE"]]) %in% names(cellline_map), 
@@ -88,7 +88,7 @@ names(plot_data) <- genes
 
 plot_data <- lapply(plot_data, as.data.frame)
 plot_data <- plot_data[order(names(plot_data))] # sort the order in alphabetical order
-saveRDS(plot_data, "/Volumes/sviswanathan/users/ycui/TrPLet/TrPLet_Table_S4/0319_Updated/TrPLet_RShiny/6283dfs_merged_across_Grouping.rds")
+saveRDS(plot_data, "/Users/yantong/TrPLet_RShiny/6283dfs_merged_across_Grouping.rds")
 
 
 ########### mutation
@@ -105,7 +105,7 @@ for (i in TCGA_lineages){
   mutation_df <- rbind(mutation_df, subdf)
   
 }
-saveRDS(mutation_df, "/Volumes/sviswanathan/users/ycui/TrPLet/TrPLet_Table_S4/0319_Updated/TrPLet_RShiny/mutation.rds")
+saveRDS(mutation_df, "/Users/yantong/TrPLet_RShiny/mutation.rds")
 
 
 
@@ -113,9 +113,9 @@ saveRDS(mutation_df, "/Volumes/sviswanathan/users/ycui/TrPLet/TrPLet_Table_S4/03
 library(tidyverse)
 
 # load data into r (download from https://figshare.com/articles/dataset/DepMap_23Q2_Public/22765112?file=40448555)
-DepMap <- read.csv("/Volumes/sviswanathan/users/ycui/TrPLet/TrPLet_Table_S4/0319_Updated/CRISPR_DepMap_Internal_23Q2_Score_Chronos.csv", check.names = FALSE, header = TRUE)
+DepMap <- read.csv("/Users/yantong/TrPLet_RShiny/CRISPR_DepMap_Internal_23Q2_Score_Chronos.csv", check.names = FALSE, header = TRUE)
 
-Model_meta <- read.csv("/Volumes/sviswanathan/users/ycui/TrPLet/TrPLet_Table_S4/0319_Updated/Model.csv", , check.names = FALSE, header = TRUE)
+Model_meta <- read.csv("/Users/yantong/TrPLet_RShiny/Model.csv", , check.names = FALSE, header = TRUE)
 
 rownames(DepMap) <- DepMap[,1]
 DepMap <- DepMap[, 2:ncol(DepMap)] 
@@ -149,18 +149,19 @@ for (i in 1:length(genes)){
 }
 names(ref_data) <- genes
 ref_data <- lapply(ref_data, as.data.frame)
-saveRDS(ref_data, "/Volumes/sviswanathan/users/ycui/TrPLet/TrPLet_Table_S4/0319_Updated/TrPLet_RShiny/6283dfs_DepMap.rds")
+saveRDS(ref_data, "/Users/yantong/TrPLet_RShiny/6283dfs_DepMap.rds")
 
 
 # Save r information for a subset of 6283 genes
-models_df <- read.csv("/Volumes/sviswanathan/users/ycui/TrPLet/TrPLet_Table_S4/0319_Updated/summary_sheet_bestmodel_bestMpermodel_noKNN.csv", header=T)
+models_df <- read.csv("/Users/yantong/TrPLet_RShiny/summary_sheet_bestmodel_bestMpermodel_noKNN.csv", header=T)
+saveRDS(models_df, "/Users/yantong/TrPLet_RShiny/AllgenesModels.rds")
 Models_6283genes <- models_df[models_df$Correl_Coeffs_5CV >= 0.2, ]
-saveRDS(Models_6283genes, "/Volumes/sviswanathan/users/ycui/TrPLet/TrPLet_Table_S4/0319_Updated/TrPLet_RShiny/6283Models.rds")
+saveRDS(Models_6283genes, "/Users/yantong/TrPLet_RShiny/6283Models.rds")
 
 
 
 ################## module & feature selection
-feature_select_path <- "/Volumes/sviswanathan/users/ycui/TrPLet/TrPLet_Table_S4/0319_Updated/model_and_feature_number_vs_performance_no_knn"
+feature_select_path <- "/Users/yantong/TrPLet_RShiny/model_and_feature_number_vs_performance_no_knn"
 features_files <- list.files(path = feature_select_path, pattern = "*.csv", full.names = TRUE)
 features_files_list <- setNames(lapply(features_files, read.csv), 
                                 tools::file_path_sans_ext(basename(features_files)) %>%
@@ -188,7 +189,7 @@ for (i in 1:length(module_genes)){
   
 }
 names(features_files_list_updated) <- module_genes
-saveRDS(features_files_list_updated, "/Volumes/sviswanathan/users/ycui/TrPLet/TrPLet_Table_S4/0319_Updated/TrPLet_RShiny/16845dfs_mergedModuleSelections.rds")
+saveRDS(features_files_list_updated, "/Users/yantong/TrPLet_RShiny/16845dfs_mergedModuleSelections.rds")
 
 
 
@@ -196,7 +197,7 @@ saveRDS(features_files_list_updated, "/Volumes/sviswanathan/users/ycui/TrPLet/Tr
 
 ############################ Process predictor weights files
 # Define the folder path
-folder_path <- "/Volumes/sviswanathan/users/ycui/TrPLet/TrPLet_Table_S4/0131_Updated.sb-06231871-UOgRAY/home/au409/TCGA_count_matrices/coefficients"
+folder_path <- "/Users/yantong/TrPLet_RShiny/coefficients"
 
 # Get a list of all CSV files in the folder
 csv_files <- list.files(path = folder_path, pattern = "*.csv", full.names = TRUE)
@@ -217,12 +218,12 @@ for (g in names(df_list)){
 }
 
 # Save the list as an RDS file
-saveRDS(df_list_updated, file = "/Volumes/sviswanathan/users/ycui/TrPLet/TrPLet_Table_S4/0319_Updated/TrPLet_RShiny/6283featureWeights.rds")
+saveRDS(df_list_updated, file = "/Users/yantong/TrPLet_RShiny/6283featureWeights.rds")
 
 
 
 ############################# Process data source table
-data_sources <- read_excel("/Volumes/sviswanathan/users/ycui/TrPLet/TrPLet_Table_S4/0319_Updated/Data_sources.xlsx")
+data_sources <- read_excel("/Users/yantong/TrPLet_RShiny/Data_sources.xlsx")
 subset_data_sources <- data_sources[, c(1,2,3)]
 # Add hyperlinks for the third column
 subset_data_sources$`Study details` <- ifelse(
@@ -233,4 +234,4 @@ subset_data_sources$`Study details` <- ifelse(
 
 
 View(subset_data_sources)
-saveRDS(subset_data_sources, file = "/Volumes/sviswanathan/users/ycui/TrPLet/TrPLet_Table_S4/0319_Updated/TrPLet_RShiny/dataSources.rds")
+saveRDS(subset_data_sources, file = "/Users/yantong/TrPLet_RShiny/dataSources.rds")
