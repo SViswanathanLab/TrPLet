@@ -6,8 +6,6 @@ If used, please cite the most recent version of the paper that is available:
 
 **_"Assembling a landscape of vulnerabilities across rare kidney cancers"_** (B. Li* & Sadagopan* et al.), bioRxiv 2024
 
-**_"Cancer target discovery enabled by transcriptome-based virtual CRISPR screening"_** (Sadagopan*, B. Li*, J. Li* et al.), bioRxiv 2025
-
 ## Summary
 
 This repo provides the scripts and workflow to predict cancer dependency scores from tumor or cell-line RNA-seq data for a subset of highly predictable genes (N=657). Although you can predict dependency scores for all genes, the accuracy will be substantially lower since most genetic dependencies are not predictable from RNA-seq data alone. The most general workflow involves:
