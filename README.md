@@ -2,7 +2,7 @@
 
 **Transcriptional Prediction of Lethality (TrPLet)**
 
-If used, please cite the most recent version of the paper that is available:
+If used, please cite the most recent version of the paper that is available on bioRxiv:
 
 **_"A framework for target discovery in rare cancers"_** (B. Li* & Sadagopan* et al.), bioRxiv 2024
 
