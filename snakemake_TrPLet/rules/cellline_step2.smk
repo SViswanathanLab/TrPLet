@@ -1,8 +1,8 @@
 rule merge_DepMap:
     input:
-        DepMap="data/Expression_Internal_23Q2.csv",
+        DepMap="data/Expression_23Q2.csv",
         sample="results/step1/gene_TPM_matrix.txt",
-        Chronos="data/CRISPR_DepMap_Internal_23Q2_Score_Chronos.csv",
+        Chronos="data/CRISPR_DepMap_23Q2_Score_Chronos.csv",
 
     output:
         "results/step2/genelog2TPMp1_Zscored_with_DepMap_Celllines.tsv.gz",
