@@ -113,7 +113,7 @@ saveRDS(mutation_df, "/Users/yantong/TrPLet_RShiny/mutation.rds")
 library(tidyverse)
 
 # load data into r (download from https://figshare.com/articles/dataset/DepMap_23Q2_Public/22765112?file=40448555)
-DepMap <- read.csv("/Users/yantong/TrPLet_RShiny/CRISPR_DepMap_Internal_23Q2_Score_Chronos.csv", check.names = FALSE, header = TRUE)
+DepMap <- read.csv("/Users/yantong/TrPLet_RShiny/CRISPR_DepMap_23Q2_Score_Chronos.csv", check.names = FALSE, header = TRUE)
 
 Model_meta <- read.csv("/Users/yantong/TrPLet_RShiny/Model.csv", , check.names = FALSE, header = TRUE)
 
