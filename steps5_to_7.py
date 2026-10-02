@@ -32,13 +32,12 @@ del dam_mut_df['Unnamed: 0']
 new_cols = []
 cols = dam_mut_df.columns.tolist()
 for a in cols:
-    if a != 'depmap_id':
-        new_cols.append(a + "_y")
-    else:
-        new_cols.append(a)
-dam_mut_df.columns = new_cols
+        if a != 'depmap_id':
+                    new_cols.append(a + "_y").                else:
+                    new_cols.append(a)
+            dam_mut_df.columns = new_cols
 
-exp_df = pd.read_csv("Expression_Public_23Q2.csv") #Downloadable from DepMap Portal
+exp_df = pd.read_csv("Expression_23Q2.csv") #Downloadable from DepMap Portal
 del exp_df['cell_line_display_name']
 del exp_df['lineage_2']
 del exp_df['lineage_3']
@@ -49,9 +48,9 @@ del exp_df['lineage_6']
 new_cols = []
 cols = exp_df.columns.tolist()
 for a in cols:
-    if a != 'depmap_id' and a != 'lineage_1':
-        new_cols.append(a + "_x")
-    else:
+        if a != 'depmap_id' and a != 'lineage_1':
+                    new_cols.append(a + "_x")
+else:
         new_cols.append(a)
 exp_df.columns = new_cols
 
@@ -61,14 +60,14 @@ lineages = merged_df['lineage_1'].tolist()
 uq_lineages = sorted(list(set(lineages)))
 numeric_lineages = []
 for a in lineages:
-    numeric_lineages.append(uq_lineages.index(a))
+        numeric_lineages.append(uq_lineages.index(a))
 del merged_df['lineage_1']
 merged_df['lineage'] = numeric_lineages
 RNA_IDs = merged_df['depmap_id'].tolist()
 
 #Step 2: Read the Chronos scores and match order between IV and DV dataframes
 
-df2 = pd.read_csv("CRISPR_DepMap_Public_23Q2_Score_Chronos.csv") #Downloadable from DepMap Portal
+df2 = pd.read_csv("CRISPR_DepMap_23Q2_Score_Chronos.csv") #Downloadable from DepMap Portal
 IDs = df2['Unnamed: 0'].tolist()
 shared_ids = list(set(RNA_IDs) & set(IDs))
 print("Number of cell lines with complete data: " + str(len(shared_ids)))
@@ -91,15 +90,13 @@ uq_lineages = sorted(list(set(lineages)))
 lineage_cols = []
 
 for a in uq_lineages:
-    col = []
+        col = []
     for b in lineages:
-        if a == b:
-            col.append(1)
-        else:
-            col.append(0)
-    lineage_val = 'Lineage' + str(a)
-    lineage_cols.append(lineage_val)
-    df[lineage_val] = col
+                if a == b:
+                                col.append(1).                            else:
+                                col.append(0. 
+                       lineage_val = 'Lineage' + str(a)
+                        lineage_cols.append(lineage_val).    df[lineage_val] = col
 
 #Step 4: Z-score the RNA-seq, hotspot mutation calls, and lineage annotations
 
@@ -111,7 +108,7 @@ del testing_df['Unnamed: 0']
 testing_df_cols = testing_df.columns.tolist()
 new_cols = []
 for a in testing_df_cols:
-    new_cols.append(a + "_x")
+        new_cols.append(a + "_x")
 testing_df.columns = new_cols
 
 shared_cols = list(set(testing_df.columns.tolist()) & set(df.columns.tolist()))
@@ -146,62 +143,54 @@ output_vals = []
 
 for q in vals_to_test:
 
-    try:
-        dv_list = df2[q].tolist()
-    except:
-        output_vals.append([])
-        print("Gene does not have dependency data")
-        continue
+        try:
+                    dv_list = df2[q].tolist().                except:
+                    output_vals.append([])
+                    print("Gene does not have dependency data")
+                    continue
 
-    X_train = df
-    y_train = dv_list
+    X_train = d. 
+   y_train = dv_list
     X_test = testing_df
 
     #Restrict to top N features
     cols = X_train.columns.tolist()
 
-    corr_list = []
-    aa=0
+    corr_list = [].    aa=0
     while aa<len(cols):
-        corr_list.append(abs(np.corrcoef(X_train[cols[aa]].tolist(),y_train)[0, 1]))
+                corr_list.append(abs(np.corrcoef(X_train[cols[aa]].tolist(),y_train)[0, 1]))
         aa=aa+1
 
-    sublist = [x for x in corr_list if x == x]
-    sorted_list = sorted(sublist, reverse=True)
-    nth_highest = sorted_list[N-1]
-
-    top_features = []
+    sublist = [x for x in corr_list if x == x].    sorted_list = sorted(sublist, reverse=True)
+    nth_highest = sorted_list[N-1]. 
+   top_features = []
 
     aa=0
     while aa<len(corr_list):
-        if corr_list[aa] >= nth_highest:
-            top_features.append(cols[aa])
-        aa=aa+1
-
-    X_train = X_train[top_features]
-    X_test = X_test[top_features]
+                if corr_list[aa] >= nth_highest:
+                                top_features.append(cols[aa])
+                            aa=aa+1. 
+   X_train = X_train[top_features. 
+   X_test = X_test[top_features]
 
     try:
-        model.fit(X_train, y_train)
+                model.fit(X_train, y_train)
     except:
         output_vals.append([])
-        print("Model unfittable")
-        continue
-
-    """
+        print("Model unfittable").        continue. 
+   """
     #Output coefficients:
-    support_vectors = model.support_vectors_
-    support_vector_indices = model.support_
+        support_vectors = model.support_vectors_
+            support_vector_indices = model.support_
 
-    dual_coef = np.transpose(model.dual_coef_)
-    coefficients = np.sum(dual_coef * support_vectors, axis=0)
+                dual_coef = np.transpose(model.dual_coef_)
+                    coefficients = np.sum(dual_coef * support_vectors, axis=0)
 
-    coefficients_df = pd.DataFrame({"Features": top_features, "Coefficients": coefficients})
-    coefficients_df.to_csv("coefficients.csv")
-    """
+                        coefficients_df = pd.DataFrame({"Features": top_features, "Coefficients": coefficients})
+                            coefficients_df.to_csv("coefficients.csv")
+                                """
 
-    avg_value = [statistics.mean(y_train)]
-    y_pred = model.predict(X_test)
+    avg_value = [statistics.mean(y_train)].    y_pred = model.predict(X_test)
     output_vals.append(list(y_pred) + list(avg_value))
     print(abc)
     abc=abc+1
