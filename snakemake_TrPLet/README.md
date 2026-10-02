@@ -22,6 +22,8 @@
   * Copy RNA-seq files (.bam or .fq or gene-level matrix) into folder ```data```
   * Download files [here](https://www.dropbox.com/scl/fo/wmfhqzzspjfqiezqhajk5/ADAUJUQgCYhnCuI3aOLxHYs?rlkey=v0fmkxyn0cqwm1o9xsqpfdwxk&st=7sc4rj0l&dl=0) into folder ```data```
 
+  * Keep the reference filenames as `Expression_23Q2.csv` and `CRISPR_DepMap_23Q2_Score_Chronos.csv`; both workflows use these names.
+
 ### Step4: Prepare ```config/sample_sheet.csv```
   * Paired-end data is assumed.
   * The following data file formats are accommodated: **.fastq.gz, .fq.gz, .fastq, .fq, .bam, gene_count_matrix.txt**

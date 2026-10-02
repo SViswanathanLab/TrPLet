@@ -38,7 +38,7 @@ for a in cols:
         new_cols.append(a)
 dam_mut_df.columns = new_cols
 
-exp_df = pd.read_csv("Expression_Public_23Q2.csv") #Downloadable from DepMap Portal
+exp_df = pd.read_csv("Expression_23Q2.csv") #Downloadable from DepMap Portal
 del exp_df['cell_line_display_name']
 del exp_df['lineage_2']
 del exp_df['lineage_3']
@@ -68,7 +68,7 @@ RNA_IDs = merged_df['depmap_id'].tolist()
 
 #Step 2: Read the Chronos scores and match order between IV and DV dataframes
 
-df2 = pd.read_csv("CRISPR_DepMap_Public_23Q2_Score_Chronos.csv") #Downloadable from DepMap Portal
+df2 = pd.read_csv("CRISPR_DepMap_23Q2_Score_Chronos.csv") #Downloadable from DepMap Portal
 IDs = df2['Unnamed: 0'].tolist()
 shared_ids = list(set(RNA_IDs) & set(IDs))
 print("Number of cell lines with complete data: " + str(len(shared_ids)))
